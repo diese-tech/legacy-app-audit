@@ -129,7 +129,7 @@
             "id": "image_source",
             "versioned_id": "image_source",
             "settings": {
-                "file": "C:/Users/acbom/Downloads/gradient sal uses.png"
+                "file": "C:/Projects/sal-prod/Assets/gradient sal uses.png"
             },
             "mixers": 0,
             "sync": 0,
@@ -155,7 +155,7 @@
             "id": "image_source",
             "versioned_id": "image_source",
             "settings": {
-                "file": "C:/Users/acbom/Desktop/Smite 2 by Tes/Tools/boxie1.png"
+                "file": "C:/Projects/sal-prod/Assets/boxie1.png"
             },
             "mixers": 0,
             "sync": 0,
@@ -212,7 +212,7 @@
             "id": "image_source",
             "versioned_id": "image_source",
             "settings": {
-                "file": "C:/Users/acbom/Desktop/Smite 2 by Tes/Tools/boxie1.png"
+                "file": "C:/Projects/sal-prod/Assets/boxie1.png"
             },
             "mixers": 0,
             "sync": 0,
@@ -383,7 +383,7 @@
             "id": "image_source",
             "versioned_id": "image_source",
             "settings": {
-                "file": "C:/Users/acbom/Downloads/start.jpg"
+                "file": "C:/Projects/sal-prod/Assets/start.jpg"
             },
             "mixers": 0,
             "sync": 0,
@@ -409,7 +409,7 @@
             "id": "image_source",
             "versioned_id": "image_source",
             "settings": {
-                "file": "C:/Users/acbom/Downloads/brb real.jpg"
+                "file": "C:/Projects/sal-prod/Assets/brb real.jpg"
             },
             "mixers": 0,
             "sync": 0,
@@ -549,7 +549,7 @@
             "id": "image_source",
             "versioned_id": "image_source",
             "settings": {
-                "file": "C:/Users/acbom/Downloads/BRB (1).jpg"
+                "file": "C:/Projects/sal-prod/Assets/BRB (1).jpg"
             },
             "mixers": 0,
             "sync": 0,
@@ -1173,7 +1173,7 @@
             "id": "image_source",
             "versioned_id": "image_source",
             "settings": {
-                "file": "C:/Users/acbom/Downloads/gradient sal uses.png"
+                "file": "C:/Projects/sal-prod/Assets/gradient sal uses.png"
             },
             "mixers": 0,
             "sync": 0,
@@ -1549,7 +1549,7 @@
             "id": "image_source",
             "versioned_id": "image_source",
             "settings": {
-                "file": "C:/Users/acbom/Downloads/gamtest.jpg"
+                "file": "C:/Projects/sal-prod/Assets/gamtest.jpg"
             },
             "mixers": 0,
             "sync": 0,
@@ -1575,7 +1575,7 @@
             "id": "image_source",
             "versioned_id": "image_source",
             "settings": {
-                "file": "C:/Users/acbom/Downloads/20260417015137_1.jpg"
+                "file": "C:/Projects/sal-prod/Assets/20260417015137_1.jpg"
             },
             "mixers": 0,
             "sync": 0,
@@ -2377,7 +2377,7 @@
             "id": "image_source",
             "versioned_id": "image_source",
             "settings": {
-                "file": "C:/Users/acbom/Downloads/SMITECOMP.COM_LOGO.png"
+                "file": "C:/Projects/sal-prod/Assets/SMITECOMP.COM_LOGO.png"
             },
             "mixers": 0,
             "sync": 0,
@@ -2403,7 +2403,7 @@
             "id": "image_source",
             "versioned_id": "image_source",
             "settings": {
-                "file": "C:/Users/acbom/Downloads/Scoreboard-top.png"
+                "file": "C:/Projects/sal-prod/Assets/Scoreboard-top.png"
             },
             "mixers": 0,
             "sync": 0,
@@ -2466,7 +2466,7 @@
             "settings": {
                 "files": [
                     {
-                        "value": "C:/Users/acbom/Downloads/SMITECOMP.COM_LOGO.png",
+                        "value": "C:/Projects/sal-prod/Assets/SMITECOMP.COM_LOGO.png",
                         "uuid": "51854304-eec7-443f-b5fe-295bafa520d0",
                         "selected": false,
                         "hidden": false
@@ -2478,7 +2478,7 @@
                         "value": "C:/Projects/sal-prod/Assets/SAL_without_words.png"
                     },
                     {
-                        "value": "C:/Users/acbom/Downloads/smitecomp qr code.png",
+                        "value": "C:/Projects/sal-prod/Assets/smitecomp qr code.png",
                         "uuid": "55a6bd72-4589-43db-afa9-69c7468000dc",
                         "selected": false,
                         "hidden": false
