@@ -1,0 +1,6 @@
+-resources_path-
+C:/Projects/sal-prod
+-resolution-
+0
+-show_god_names-
+True
