@@ -20,7 +20,7 @@ appear, when picks lock in, when audio callouts play. Nothing is automated.
 
 **[→ Latest release](../../releases/latest)**
 
-Download `SmitePnB.exe` from the Releases page. No installer, no runtime — just the exe.
+Download `SmitePnB.zip` from the Releases page. Extract it — you'll get `SmitePnB.exe` and a `Resources/` folder side by side. No installer, no runtime.
 
 ---
 
@@ -38,7 +38,12 @@ Download `SmitePnB.exe` from the Releases page. No installer, no runtime — jus
 On first launch, SmitePnB will ask you to point it at the Resources folder.
 That folder contains everything the app needs: god images, sounds, and team data.
 
-If you're running from this repo, that path will be something like:
+If you extracted the release zip, that path will be something like:
+```
+C:\SmitePnB\Resources
+```
+
+If you're running from the repo, it'll be something like:
 ```
 C:\Projects\legacy-app-audit\SmitePnB\Resources
 ```
