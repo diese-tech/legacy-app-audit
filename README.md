@@ -191,6 +191,55 @@ SmitePnB/
 
 ---
 
+## Testing
+
+### Running the tests
+
+From the `SmitePnB/` folder (the one containing the `.sln` file):
+
+```
+dotnet test
+```
+
+That's it. No setup, no database, no external dependencies. The test suite spins up its own temp folders, runs, and cleans up after itself.
+
+### What is being tested and why
+
+| Test group | Tests | Why these fields |
+|---|---|---|
+| **DraftState** | `Clear()` resets team names, scores, folder names, all ban slots, all pick slots | The autosave restore flow depends on `Clear()` being complete — a half-cleared state mid-broadcast would silently carry over old picks into a new draft |
+| **BanSlot / PickSlot** | `Clear()` resets god name, hover, and lock individually | Each field drives a different visual on the display window; one field left set means a ghost ban or pick showing on stream |
+| **TeamConfig — RecordGame** | Only locked bans count; unlocked bans are ignored; empty god names are skipped; unknown gods don't throw | Ban stats are permanent — a double-count or a crash on submit can't be undone without manually editing JSON files |
+| **TeamConfig — GetTopBans** | Sorted descending; N limit respected; empty roster; N larger than available bans | The top-bans display reads this directly — wrong order or wrong count shows the wrong gods on stream |
+| **StateSerializer round-trip** | Team names, scores, ban hover/lock state, pick lock state all survive save → reload | If any field is dropped during serialization, the operator's restore after a crash is incomplete and they'd have to re-enter the draft from memory mid-event |
+| **StateSerializer expiry** | Saves older than 12 hours are rejected; saves within 12 hours are accepted | A stale save from a previous event day appearing as a restore prompt on the next event day would confuse the operator |
+| **StateSerializer corruption** | Corrupt JSON returns null and deletes the file | A corrupt autosave that crashes the restore prompt crashes the whole startup — the app must degrade gracefully |
+| **ResourceLoader — VerifyResources** | Missing subfolders and missing CharactersList.txt each produce a specific error message | This is the gatekeeper that runs on startup — vague or missing errors leave the operator unable to diagnose what's wrong with their Resources folder |
+| **ResourceLoader — LoadGodList** | Blank lines are skipped; missing file returns empty list | Blank lines in CharactersList.txt become empty entries in every god dropdown; a missing file that throws would crash startup |
+| **ResourceLoader — TryAddGod** | Blank name rejected; duplicate name rejected case-insensitively; each asset type copied to the correct folder; sound extension preserved; works with no assets at all | Files copied to the wrong folder are silently missing on stream; case-insensitive duplicate check prevents `Achilles` and `achilles` coexisting in the dropdown |
+| **ResourceLoader — RemoveGod** | Removed from list; other gods unaffected; asset files kept on disk; missing CharactersList.txt doesn't throw | Asset files are kept so a god can be re-added without re-importing — deleting them would be unrecoverable |
+| **ResourceLoader — GetAllGodAssetStatus** | Detects `.png`, `.mp3`, and `.wav` presence; all missing by default | The God Manager status grid reads this — a false positive hides a missing asset that will show as a blank slot on stream |
+| **ResourceLoader — LoadTeam** | Corrupt BanData.json falls back to folder name; missing folder returns empty config | A team file that throws on load would crash the entire operator panel at startup |
+| **ResourceLoader — GetGodSoundPath** | Finds `.mp3`; finds `.wav`; returns null when neither exists | God callout audio checks both extensions — only checking `.mp3` silently drops any `.wav` callouts |
+
+### What passing tests mean
+
+The core data layer is sound: draft state serializes and deserializes correctly, ban stats can't be double-counted or crash on bad input, god files land in the right folders, and every fail-soft path (corrupt files, missing files, bad JSON) returns a safe value instead of an exception. A broadcast won't crash due to any of the logic covered here.
+
+The UI windows (operator panel, display, settings) and audio playback are not covered by automated tests — those are exercised manually before each event.
+
+### Successful test output
+
+When all tests pass you will see:
+
+```
+Passed!  - Failed:     0, Passed:    51, Skipped:     0, Total:    51
+```
+
+If `Failed` is anything other than `0`, do not use the build for a live broadcast until the failures are investigated.
+
+---
+
 ## Contributing
 
 Pull requests welcome. If you're adding gods, fixing assets, or improving the
