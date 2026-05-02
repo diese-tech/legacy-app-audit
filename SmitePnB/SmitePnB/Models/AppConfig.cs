@@ -33,7 +33,8 @@ public class AppConfig
 
     public static (int Width, int Height) GetResolutionSize(int index) => index switch
     {
-        1 => (2560, 1440),
-        _ => (1920, 1080),
+        1 => (1920, 1080),
+        2 => (2560, 1440),
+        _ => (1600, 900),   // default
     };
 }

@@ -60,6 +60,7 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Text="Resolution:" VerticalAlignment="Center"/>
                     <ComboBox  x:Name="CmbResolution" Grid.Column="1">
+                        <ComboBoxItem Content="1600 × 900"/>
                         <ComboBoxItem Content="1920 × 1080"/>
                         <ComboBoxItem Content="2560 × 1440"/>
                     </ComboBox>
