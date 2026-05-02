@@ -2,7 +2,7 @@
 echo Building SmitePnB...
 echo.
 
-dotnet publish SmitePnB\SmitePnB\SmitePnB.csproj --configuration Release --output build\
+dotnet publish SmitePnB\SmitePnB\SmitePnB.csproj --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true --output build\
 
 if %errorlevel% neq 0 (
     echo.
