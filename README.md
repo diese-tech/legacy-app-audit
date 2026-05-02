@@ -19,19 +19,15 @@ appear, when picks lock in, when audio callouts play. Nothing is automated.
 ## What you need
 
 - Windows 10 or 11
-- [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) (free, one-time install)
 - OBS Studio
+
+No runtime install required. The app is fully self-contained — everything it needs is bundled inside the `.exe`.
 
 ---
 
 ## Setup Guide
 
-### Step 1 — Install the .NET runtime
-
-Download and run the **.NET 8 Desktop Runtime** from Microsoft's site (link above).
-You only need to do this once per machine.
-
-### Step 2 — Set your resources path
+### Step 1 — Set your resources path
 
 On first launch, SmitePnB will ask you to point it at the Resources folder.
 That folder contains everything the app needs: god images, sounds, and team data.
@@ -43,7 +39,7 @@ C:\Projects\legacy-app-audit\SmitePnB\Resources
 
 Set it in the Settings window (⚙ button in the top bar) and hit Save.
 
-### Step 3 — Import the OBS scene collection
+### Step 2 — Import the OBS scene collection
 
 In OBS: **Scene Collection → Import → select `SmitePnB_OBS.json`**
 
@@ -68,7 +64,7 @@ league-specific and aren't included here. In OBS, open each scene and update
 the Image/Media sources to point to your own league's artwork. Everything else
 (the pick/ban overlay, scene structure, transitions) works out of the box.
 
-### Step 4 — Add your teams
+### Step 3 — Add your teams
 
 Each team gets a folder inside `Resources/Teams/`. The folder name is what
 appears in the team dropdown.
@@ -188,6 +184,17 @@ SmitePnB/
     └── Display/
         └── layout.json           Element positions on the display window
 ```
+
+### Building a release
+
+```
+cd SmitePnB
+dotnet publish SmitePnB/SmitePnB.csproj -c Release
+```
+
+Output lands in `SmitePnB/bin/Release/net8.0-windows/win-x64/publish/`.
+The result is a single `SmitePnB.exe` with no external dependencies — copy it
+and the `Resources/` folder to any Windows 10/11 machine and it runs.
 
 ---
 
