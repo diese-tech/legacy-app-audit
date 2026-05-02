@@ -1,5 +1,5 @@
 // SmitePnB — Smite 2 Pick & Ban broadcasting tool
-// Remade by diese | original concept from the SAL/SDL community
+// Remade by diese | original concept from the Smite esports community
 using System.Windows;
 using SmitePnB.Services;
 

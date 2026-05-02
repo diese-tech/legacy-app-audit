@@ -331,7 +331,7 @@ public partial class MainWindow : Window
     {
         MessageBox.Show(
             "SmitePnB\nSmite 2 Pick & Ban broadcasting tool\n\n" +
-            "Remade by diese\nBuilt on the foundation of the SAL/SDL community\n\n" +
+            "Remade by diese\nBuilt on the foundation of the Smite esports community\n\n" +
             "github.com/diese-tech/legacy-app-audit",
             "About SmitePnB", MessageBoxButton.OK, MessageBoxImage.Information);
     }

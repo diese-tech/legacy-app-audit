@@ -3,7 +3,7 @@
 A standalone Windows desktop app and OBS scene collection for running live
 pick-and-ban overlays during competitive Smite 2 broadcasts.
 
-Remade by diese. Built on the foundation of the SAL/SDL community.
+Remade by diese. Built on the foundation of the Smite esports community.
 
 ---
 
@@ -45,7 +45,7 @@ Set it in the Settings window (⚙ button in the top bar) and hit Save.
 
 ### Step 3 — Import the OBS scene collection
 
-In OBS: **Scene Collection → Import → select `SAL_PROD.json`**
+In OBS: **Scene Collection → Import → select `SmitePnB_OBS.json`**
 
 This gives you six ready-to-use scenes:
 
@@ -60,6 +60,13 @@ This gives you six ready-to-use scenes:
 
 The pick-and-ban overlay in the PNBS scene captures the SmitePnB display
 window automatically. As long as the app is running, OBS will pick it up.
+
+**Replacing the background images and logos:**
+The scene collection references asset files under `C:/SmitePnB/Assets/`.
+These are placeholder paths — the original backgrounds and logos were
+league-specific and aren't included here. In OBS, open each scene and update
+the Image/Media sources to point to your own league's artwork. Everything else
+(the pick/ban overlay, scene structure, transitions) works out of the box.
 
 ### Step 4 — Add your teams
 

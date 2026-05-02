@@ -1,5 +1,5 @@
 -resources_path-
-C:/Projects/sal-prod
+C:/SmitePnB/Resources
 -resolution-
 0
 -show_god_names-
