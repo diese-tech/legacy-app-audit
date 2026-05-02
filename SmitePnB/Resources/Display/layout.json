@@ -1,0 +1,141 @@
+{
+  "pickSlot": {
+    "width": 335,
+    "height": 110
+  },
+  "banSlot": {
+    "width": 165,
+    "height": 67
+  },
+  "teamPanel": {
+    "width": 650,
+    "height": 180
+  },
+  "scoreBox": {
+    "width": 100,
+    "height": 60
+  },
+  "leftBan1": {
+    "x": 0,
+    "y": 180
+  },
+  "leftBan2": {
+    "x": 0,
+    "y": 290
+  },
+  "leftBan3": {
+    "x": 0,
+    "y": 400
+  },
+  "leftBan4": {
+    "x": 0,
+    "y": 510
+  },
+  "leftBan5": {
+    "x": 0,
+    "y": 620
+  },
+  "rightBan1": {
+    "x": 1265,
+    "y": 180
+  },
+  "rightBan2": {
+    "x": 1265,
+    "y": 290
+  },
+  "rightBan3": {
+    "x": 1265,
+    "y": 400
+  },
+  "rightBan4": {
+    "x": 1265,
+    "y": 510
+  },
+  "rightBan5": {
+    "x": 1265,
+    "y": 620
+  },
+  "leftPick1": {
+    "x": 67,
+    "y": 735
+  },
+  "leftPick2": {
+    "x": 134,
+    "y": 735
+  },
+  "leftPick3": {
+    "x": 201,
+    "y": 735
+  },
+  "leftPick4": {
+    "x": 268,
+    "y": 735
+  },
+  "leftPick5": {
+    "x": 335,
+    "y": 735
+  },
+  "rightPick1": {
+    "x": 1533,
+    "y": 735
+  },
+  "rightPick2": {
+    "x": 1466,
+    "y": 735
+  },
+  "rightPick3": {
+    "x": 1399,
+    "y": 735
+  },
+  "rightPick4": {
+    "x": 1332,
+    "y": 735
+  },
+  "rightPick5": {
+    "x": 1265,
+    "y": 735
+  },
+  "leftTeamPanel": {
+    "x": 0,
+    "y": 180
+  },
+  "rightTeamPanel": {
+    "x": 1265,
+    "y": 180
+  },
+  "leftScore": {
+    "x": 460,
+    "y": 0
+  },
+  "rightScore": {
+    "x": 950,
+    "y": 0
+  },
+  "leftTeamName": {
+    "x": 335,
+    "y": 700
+  },
+  "rightTeamName": {
+    "x": 965,
+    "y": 700
+  },
+  "leftTopBans": {
+    "x": 0,
+    "y": 180
+  },
+  "rightTopBans": {
+    "x": 950,
+    "y": 180
+  },
+  "playerNameOffset": {
+    "x": 0,
+    "y": 80
+  },
+  "roleLabels": [
+    "SOLO",
+    "JUNGLE",
+    "MID",
+    "SUPPORT",
+    "CARRY"
+  ]
+}

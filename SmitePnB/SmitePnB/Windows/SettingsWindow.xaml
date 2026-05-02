@@ -1,0 +1,137 @@
+<Window x:Class="SmitePnB.Windows.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Settings"
+        Background="{StaticResource PanelBg}"
+        Foreground="{StaticResource TextPrimary}"
+        Width="560" Height="640"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Loaded="Window_Loaded">
+
+    <Window.Resources>
+        <Style TargetType="TextBox">
+            <Setter Property="Background"  Value="{StaticResource ControlBg}"/>
+            <Setter Property="Foreground"  Value="{StaticResource TextPrimary}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="Padding"     Value="4,2"/>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Background"  Value="{StaticResource ControlBg}"/>
+            <Setter Property="Foreground"  Value="{StaticResource TextPrimary}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+        </Style>
+    </Window.Resources>
+
+    <DockPanel Margin="16">
+
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button x:Name="BtnSave"   Content="Save"   Width="80" Margin="0,0,8,0"
+                    Style="{StaticResource OperatorButton}" Click="BtnSave_Click"/>
+            <Button x:Name="BtnCancel" Content="Cancel" Width="80"
+                    Style="{StaticResource OperatorButton}" Click="BtnCancel_Click"/>
+        </StackPanel>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+
+                <!-- ── Resources path ──────────────────────────────────── -->
+                <TextBlock Text="RESOURCES PATH" Style="{StaticResource SectionLabel}"/>
+                <TextBlock Text="Absolute path to your Resources folder (contains CharactersList.txt, Teams, Sounds, etc.)"
+                           Foreground="{StaticResource TextMuted}" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="80"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="TxtResourcesPath" Grid.Column="0" Margin="0,0,6,0"/>
+                    <Button  x:Name="BtnBrowse" Grid.Column="1" Content="Browse…"
+                             Style="{StaticResource OperatorButton}" Click="BtnBrowse_Click"/>
+                </Grid>
+                <TextBlock x:Name="TxtVerifyResult" Foreground="OrangeRed" FontSize="11"
+                           Margin="0,4,0,0" TextWrapping="Wrap" Visibility="Collapsed"/>
+
+                <!-- ── Display ─────────────────────────────────────────── -->
+                <TextBlock Text="DISPLAY" Style="{StaticResource SectionLabel}"/>
+                <Grid Margin="0,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Resolution:" VerticalAlignment="Center"/>
+                    <ComboBox  x:Name="CmbResolution" Grid.Column="1">
+                        <ComboBoxItem Content="1920 × 1080"/>
+                        <ComboBoxItem Content="2560 × 1440"/>
+                    </ComboBox>
+                </Grid>
+
+                <!-- ── Typography ──────────────────────────────────────── -->
+                <TextBlock Text="TYPOGRAPHY" Style="{StaticResource SectionLabel}"/>
+                <Grid Margin="0,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Font:" VerticalAlignment="Center"/>
+                    <ComboBox  x:Name="CmbFont" Grid.Column="1" IsEditable="True"
+                               SelectionChanged="CmbFont_Changed"/>
+                </Grid>
+
+                <!-- ── Colors ──────────────────────────────────────────── -->
+                <TextBlock Text="COLORS  (hex, e.g. #FFFFFF)" Style="{StaticResource SectionLabel}"/>
+                <Grid Margin="0,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="24"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="God Name Color:" VerticalAlignment="Center"/>
+                    <TextBox   x:Name="TxtGodNameColor"  Grid.Column="1" TextChanged="ColorInput_Changed"/>
+                    <Rectangle x:Name="SwatchGodName"    Grid.Column="2" Margin="4,2,0,2"/>
+                </Grid>
+                <Grid Margin="0,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="24"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Team Name Color:" VerticalAlignment="Center"/>
+                    <TextBox   x:Name="TxtTeamNameColor" Grid.Column="1" TextChanged="ColorInput_Changed"/>
+                    <Rectangle x:Name="SwatchTeamName"   Grid.Column="2" Margin="4,2,0,2"/>
+                </Grid>
+                <Grid Margin="0,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="24"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Score Color:" VerticalAlignment="Center"/>
+                    <TextBox   x:Name="TxtScoreColor"    Grid.Column="1" TextChanged="ColorInput_Changed"/>
+                    <Rectangle x:Name="SwatchScore"      Grid.Column="2" Margin="4,2,0,2"/>
+                </Grid>
+
+                <!-- ── Layout ──────────────────────────────────────────── -->
+                <TextBlock Text="LAYOUT  (pixel positions on the display window)" Style="{StaticResource SectionLabel}"/>
+                <TextBlock Text="Edit layout.json in Resources/Display/ for full control. Common positions below."
+                           Foreground="{StaticResource TextMuted}" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,6"/>
+
+                <Button Content="Open layout.json in default editor"
+                        Style="{StaticResource OperatorButton}" HorizontalAlignment="Left"
+                        Click="BtnOpenLayout_Click" Margin="0,0,0,4"/>
+
+                <Button Content="Reset layout to defaults"
+                        Style="{StaticResource DangerButton}" HorizontalAlignment="Left"
+                        Click="BtnResetLayout_Click"/>
+
+                <!-- ── Role labels ─────────────────────────────────────── -->
+                <TextBlock Text="ROLE LABELS  (shown under player names)" Style="{StaticResource SectionLabel}"/>
+                <TextBlock Text="Five entries, one per line: Solo / Jungle / Mid / Support / Carry order"
+                           Foreground="{StaticResource TextMuted}" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                <TextBox x:Name="TxtRoleLabels" Height="90" AcceptsReturn="True"
+                         VerticalScrollBarVisibility="Auto" FontFamily="Consolas"/>
+
+            </StackPanel>
+        </ScrollViewer>
+
+    </DockPanel>
+</Window>

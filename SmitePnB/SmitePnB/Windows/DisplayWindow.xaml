@@ -1,0 +1,55 @@
+<Window x:Class="SmitePnB.Windows.DisplayWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="P/B Display"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        Background="Black"
+        ShowInTaskbar="False"
+        SizeToContent="Manual">
+
+    <!--
+        This window is captured by OBS via window_capture ("P/B Display").
+        Everything here is purely visual — no operator interaction happens here.
+        All element positions are set in code-behind from LayoutConfig.
+    -->
+    <Canvas x:Name="RootCanvas" Background="Black">
+
+        <!-- ── Team background panels ───────────────────────────────── -->
+        <Rectangle x:Name="LeftTeamBg"  Canvas.Left="0" Canvas.Top="0"
+                   Fill="#AA000000" Visibility="Collapsed"/>
+        <Rectangle x:Name="RightTeamBg" Canvas.Left="0" Canvas.Top="0"
+                   Fill="#AA000000" Visibility="Collapsed"/>
+
+        <!-- ── Team names ────────────────────────────────────────────── -->
+        <TextBlock x:Name="LeftTeamName"  Canvas.Left="0" Canvas.Top="0"
+                   Foreground="White" FontFamily="Impact" FontSize="28"
+                   TextAlignment="Center"/>
+        <TextBlock x:Name="RightTeamName" Canvas.Left="0" Canvas.Top="0"
+                   Foreground="White" FontFamily="Impact" FontSize="28"
+                   TextAlignment="Center"/>
+
+        <!-- ── Scores ─────────────────────────────────────────────────── -->
+        <TextBlock x:Name="LeftScore"  Canvas.Left="0" Canvas.Top="0"
+                   Foreground="White" FontFamily="Impact" FontSize="48"
+                   TextAlignment="Center" Text="0"/>
+        <TextBlock x:Name="RightScore" Canvas.Left="0" Canvas.Top="0"
+                   Foreground="White" FontFamily="Impact" FontSize="48"
+                   TextAlignment="Center" Text="0"/>
+
+        <!-- ── Ban slots (generated in code-behind) ──────────────────── -->
+        <!-- Left bans: LeftBan0..4 -->
+        <!-- Right bans: RightBan0..4 -->
+
+        <!-- ── Pick slots (generated in code-behind) ─────────────────── -->
+        <!-- Left picks: LeftPick0..4  (with optional god name overlay) -->
+        <!-- Right picks: RightPick0..4 -->
+
+        <!-- ── Top bans panel ─────────────────────────────────────────── -->
+        <StackPanel x:Name="LeftTopBansPanel"  Canvas.Left="0" Canvas.Top="0"
+                    Orientation="Horizontal" Visibility="Collapsed"/>
+        <StackPanel x:Name="RightTopBansPanel" Canvas.Left="0" Canvas.Top="0"
+                    Orientation="Horizontal" Visibility="Collapsed"/>
+
+    </Canvas>
+</Window>
