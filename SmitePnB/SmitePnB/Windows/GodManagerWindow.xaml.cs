@@ -7,6 +7,8 @@ namespace SmitePnB.Windows;
 
 public partial class GodManagerWindow : Window
 {
+    public GodManagerWindow() { InitializeComponent(); }
+
     private string? _pickPath;
     private string? _banPath;
     private string? _topBanPath;

@@ -4,187 +4,400 @@
         Title="Settings"
         Background="{StaticResource PanelBg}"
         Foreground="{StaticResource TextPrimary}"
-        Width="960" Height="780"
-        MinWidth="900" MinHeight="700"
+        Width="1280" Height="740"
+        MinWidth="1100" MinHeight="660"
         Loaded="Window_Loaded"
         Closing="Window_Closing">
 
-    <Window.Resources>
-        <!-- ComboBox dark style -->
-        <Style TargetType="ComboBox">
-            <Setter Property="Background"  Value="{StaticResource ControlBg}"/>
-            <Setter Property="Foreground"  Value="{StaticResource TextPrimary}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
-        </Style>
-        <Style TargetType="TextBox">
-            <Setter Property="Background"  Value="{StaticResource ControlBg}"/>
-            <Setter Property="Foreground"  Value="{StaticResource TextPrimary}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
-            <Setter Property="Padding"     Value="4,2"/>
-        </Style>
-        <Style TargetType="CheckBox">
-            <Setter Property="Foreground"  Value="{StaticResource TextPrimary}"/>
-        </Style>
-    </Window.Resources>
+    <Grid Margin="8,6">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="175"/>  <!-- Team 1 -->
+            <ColumnDefinition Width="*"/>    <!-- Picks + Bans center -->
+            <ColumnDefinition Width="175"/>  <!-- Team 2 -->
+            <ColumnDefinition Width="1"/>    <!-- Gold divider -->
+            <ColumnDefinition Width="330"/>  <!-- Right panel -->
+        </Grid.ColumnDefinitions>
 
-    <DockPanel Margin="10">
+        <!-- ══ TEAM 1 column ═══════════════════════════════════════════════ -->
+        <DockPanel Grid.Column="0" Margin="0,0,6,0" LastChildFill="False">
 
-        <!-- ── Top bar ─────────────────────────────────────────────────── -->
-        <ToolBar DockPanel.Dock="Top" Background="{StaticResource ControlBg}" Margin="0,0,0,8">
-            <Button x:Name="BtnNewDraft"   Content="New Draft"    Style="{StaticResource OperatorButton}" Click="BtnNewDraft_Click"   ToolTip="Clear all picks and bans"/>
-            <Button x:Name="BtnSubmitBans" Content="Submit Bans"  Style="{StaticResource OperatorButton}" Click="BtnSubmitBans_Click" ToolTip="Record this game's ban data and increment game count"/>
-            <Separator/>
-            <Button x:Name="BtnSwapTeams"  Content="⇄ Swap Teams" Style="{StaticResource OperatorButton}" Click="BtnSwapTeams_Click"  ToolTip="Swap left/right team sides"/>
-            <Separator/>
-            <CheckBox x:Name="ChkShowGodNames" Content="God Names" IsChecked="True"
-                      Checked="ChkShowGodNames_Changed" Unchecked="ChkShowGodNames_Changed"
-                      VerticalAlignment="Center" Margin="4,0"/>
-            <Separator/>
-            <Button x:Name="BtnGodManager" Content="Gods…"     Style="{StaticResource OperatorButton}" Click="BtnGodManager_Click" ToolTip="Add or remove gods, check which assets are present"/>
-            <Button x:Name="BtnSettings"   Content="⚙ Config"  Style="{StaticResource OperatorButton}" Click="BtnSettings_Click" ToolTip="App configuration: paths, colors, layout"/>
-            <Separator/>
-            <Button x:Name="BtnShowDisplay" Content="P/B Display"      Style="{StaticResource OperatorButton}" Click="BtnShowDisplay_Click"  ToolTip="Bring the P/B Display stream window to front"/>
-            <Button x:Name="BtnShowOverlay" Content="In-Game Overlay"  Style="{StaticResource OperatorButton}" Click="BtnShowOverlay_Click"  ToolTip="Bring the In-Game Overlay stream window to front"/>
-            <Separator/>
-            <Button x:Name="BtnAbout"      Content="About"      Style="{StaticResource OperatorButton}" Click="BtnAbout_Click"/>
-        </ToolBar>
+            <TextBlock DockPanel.Dock="Top" Text="TEAM 1"
+                       Style="{StaticResource TeamLabel}"/>
 
-        <!-- ── Score row ───────────────────────────────────────────────── -->
-        <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="80"/>
-                <ColumnDefinition Width="40"/>
-                <ColumnDefinition Width="80"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="1" Text="Left Score"  Style="{StaticResource SectionLabel}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,6,0"/>
-            <TextBox   x:Name="TxtLeftScore"  Grid.Column="1" Width="50" HorizontalAlignment="Left" Text="0" TextChanged="Score_Changed" MaxLength="2"/>
-            <TextBlock Grid.Column="2" Text="—" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource TextMuted}"/>
-            <TextBox   x:Name="TxtRightScore" Grid.Column="3" Width="50" HorizontalAlignment="Left" Text="0" TextChanged="Score_Changed" MaxLength="2"/>
-        </Grid>
+            <ComboBox  x:Name="CmbTeamOne" DockPanel.Dock="Top"
+                       SelectionChanged="CmbTeamOne_Changed" Margin="0,0,0,8"/>
 
-        <!-- ── Main draft panel ────────────────────────────────────────── -->
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>   <!-- Team One -->
-                <ColumnDefinition Width="12"/>  <!-- gutter -->
-                <ColumnDefinition Width="*"/>   <!-- Team Two -->
-            </Grid.ColumnDefinitions>
+            <TextBlock DockPanel.Dock="Top" Text="SCORE"
+                       Style="{StaticResource SectionLabel}"/>
 
-            <!-- ── Team One ─────────────────────────────────────────────── -->
-            <StackPanel Grid.Column="0">
-                <!-- Team selector -->
-                <TextBlock Text="TEAM ONE (LEFT)" Style="{StaticResource SectionLabel}"/>
-                <ComboBox x:Name="CmbTeamOne" SelectionChanged="CmbTeamOne_Changed" Margin="0,0,0,4"/>
+            <TextBox   x:Name="TxtLeftScore" DockPanel.Dock="Top"
+                       Width="70" HorizontalAlignment="Left"
+                       Text="0" MaxLength="2"
+                       TextChanged="Score_Changed"/>
+        </DockPanel>
 
-                <!-- Bans -->
-                <TextBlock Text="BANS" Style="{StaticResource SectionLabel}"/>
-                <ItemsControl x:Name="TeamOneBanList">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Grid Margin="0,2">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="70"/>
-                                    <ColumnDefinition Width="60"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="{Binding Label}" VerticalAlignment="Center" Foreground="{StaticResource TextMuted}" FontSize="11"/>
-                                <ComboBox  Grid.Column="1" ItemsSource="{Binding Gods}" SelectedItem="{Binding GodName, Mode=TwoWay}"
-                                           SelectionChanged="BanGod_Changed" Tag="{Binding}" Margin="0,0,4,0"/>
-                                <CheckBox  Grid.Column="2" Content="Hover" IsChecked="{Binding IsHovered, Mode=TwoWay}"
-                                           Checked="BanHover_Changed" Unchecked="BanHover_Changed" Tag="{Binding}" VerticalAlignment="Center"/>
-                                <CheckBox  Grid.Column="3" Content="Lock"  IsChecked="{Binding IsLocked, Mode=TwoWay}"
-                                           Checked="BanLock_Changed"  Unchecked="BanLock_Changed"  Tag="{Binding}" VerticalAlignment="Center"/>
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+        <!-- ══ CENTER: Picks + Bans ═════════════════════════════════════════ -->
+        <DockPanel Grid.Column="1" LastChildFill="False">
 
-                <Button Content="Reset Bans" Style="{StaticResource DangerButton}" Margin="0,4,0,0"
-                        Click="BtnResetTeamOneBans_Click"/>
-
-                <!-- Picks -->
-                <TextBlock Text="PICKS" Style="{StaticResource SectionLabel}"/>
-                <ItemsControl x:Name="TeamOnePickList">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Grid Margin="0,2">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="70"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="60"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="{Binding Role}" VerticalAlignment="Center" Foreground="{StaticResource TextMuted}" FontSize="11"/>
-                                <ComboBox  Grid.Column="1" ItemsSource="{Binding Gods}" SelectedItem="{Binding GodName, Mode=TwoWay}"
-                                           SelectionChanged="PickGod_Changed" Tag="{Binding}" Margin="0,0,4,0"/>
-                                <CheckBox  Grid.Column="2" Content="Lock" IsChecked="{Binding IsLocked, Mode=TwoWay}"
-                                           Checked="PickLock_Changed" Unchecked="PickLock_Changed" Tag="{Binding}" VerticalAlignment="Center"/>
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-
-                <Button Content="Reset Picks" Style="{StaticResource DangerButton}" Margin="0,4,0,0"
-                        Click="BtnResetTeamOnePicks_Click"/>
+            <!-- Top action strip -->
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,4">
+                <Button Content="New Draft"    Style="{StaticResource OperatorButton}"
+                        Click="BtnNewDraft_Click" Margin="0,0,4,0"/>
+                <CheckBox x:Name="ChkShowGodNames" Content="God Names" IsChecked="True"
+                          Checked="ChkShowGodNames_Changed" Unchecked="ChkShowGodNames_Changed"
+                          VerticalAlignment="Center" Margin="4,0"/>
             </StackPanel>
 
-            <!-- ── Team Two ─────────────────────────────────────────────── -->
-            <StackPanel Grid.Column="2">
-                <TextBlock Text="TEAM TWO (RIGHT)" Style="{StaticResource SectionLabel}"/>
-                <ComboBox x:Name="CmbTeamTwo" SelectionChanged="CmbTeamTwo_Changed" Margin="0,0,0,4"/>
+            <!-- ── PICKS section ──────────────────────────────────────── -->
+            <Border DockPanel.Dock="Top" Style="{StaticResource GoldSection}">
+                <StackPanel>
 
-                <TextBlock Text="BANS" Style="{StaticResource SectionLabel}"/>
-                <ItemsControl x:Name="TeamTwoBanList">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Grid Margin="0,2">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="70"/>
-                                    <ColumnDefinition Width="60"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="{Binding Label}" VerticalAlignment="Center" Foreground="{StaticResource TextMuted}" FontSize="11"/>
-                                <ComboBox  Grid.Column="1" ItemsSource="{Binding Gods}" SelectedItem="{Binding GodName, Mode=TwoWay}"
-                                           SelectionChanged="BanGod_Changed" Tag="{Binding}" Margin="0,0,4,0"/>
-                                <CheckBox  Grid.Column="2" Content="Hover" IsChecked="{Binding IsHovered, Mode=TwoWay}"
-                                           Checked="BanHover_Changed" Unchecked="BanHover_Changed" Tag="{Binding}" VerticalAlignment="Center"/>
-                                <CheckBox  Grid.Column="3" Content="Lock"  IsChecked="{Binding IsLocked, Mode=TwoWay}"
-                                           Checked="BanLock_Changed"  Unchecked="BanLock_Changed"  Tag="{Binding}" VerticalAlignment="Center"/>
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                    <!-- Header row: PICKS label | "LOCKED IN" over checkbox col -->
+                    <Grid Margin="0,0,0,2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="22"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="60"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="22"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Grid.ColumnSpan="5"
+                                   Text="PICKS" Style="{StaticResource GoldHeading}"
+                                   HorizontalAlignment="Left"/>
+                        <TextBlock Grid.Column="2"
+                                   Text="LOCKED IN" FontSize="9"
+                                   Foreground="{StaticResource GoldBrush}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Bottom"/>
+                    </Grid>
 
-                <Button Content="Reset Bans" Style="{StaticResource DangerButton}" Margin="0,4,0,0"
-                        Click="BtnResetTeamTwoBans_Click"/>
+                    <!-- 5 paired pick rows -->
+                    <ItemsControl x:Name="PickPairList">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Height="30" Margin="0,1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="22"/>  <!-- T1 row# -->
+                                        <ColumnDefinition Width="*"/>   <!-- T1 god combo -->
+                                        <ColumnDefinition Width="30"/>  <!-- T1 lock -->
+                                        <ColumnDefinition Width="30"/>  <!-- T2 lock -->
+                                        <ColumnDefinition Width="*"/>   <!-- T2 god combo -->
+                                        <ColumnDefinition Width="22"/>  <!-- T2 row# -->
+                                    </Grid.ColumnDefinitions>
 
-                <TextBlock Text="PICKS" Style="{StaticResource SectionLabel}"/>
-                <ItemsControl x:Name="TeamTwoPickList">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Grid Margin="0,2">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="70"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="60"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="{Binding Role}" VerticalAlignment="Center" Foreground="{StaticResource TextMuted}" FontSize="11"/>
-                                <ComboBox  Grid.Column="1" ItemsSource="{Binding Gods}" SelectedItem="{Binding GodName, Mode=TwoWay}"
-                                           SelectionChanged="PickGod_Changed" Tag="{Binding}" Margin="0,0,4,0"/>
-                                <CheckBox  Grid.Column="2" Content="Lock" IsChecked="{Binding IsLocked, Mode=TwoWay}"
-                                           Checked="PickLock_Changed" Unchecked="PickLock_Changed" Tag="{Binding}" VerticalAlignment="Center"/>
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                                    <TextBlock Grid.Column="0" Text="{Binding RowNum}"
+                                               Foreground="{StaticResource GoldBrush}"
+                                               FontWeight="Bold" VerticalAlignment="Center"
+                                               HorizontalAlignment="Center"/>
 
-                <Button Content="Reset Picks" Style="{StaticResource DangerButton}" Margin="0,4,0,0"
-                        Click="BtnResetTeamTwoPicks_Click"/>
+                                    <ComboBox Grid.Column="1"
+                                              ItemsSource="{Binding Gods}"
+                                              SelectedItem="{Binding T1God, Mode=TwoWay}"
+                                              Tag="{Binding}"
+                                              SelectionChanged="PickT1God_Changed"
+                                              Margin="2,0"/>
+
+                                    <CheckBox Grid.Column="2"
+                                              IsChecked="{Binding T1Locked, Mode=TwoWay}"
+                                              Tag="{Binding}"
+                                              Checked="PickT1Lock_Changed"
+                                              Unchecked="PickT1Lock_Changed"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+
+                                    <CheckBox Grid.Column="3"
+                                              IsChecked="{Binding T2Locked, Mode=TwoWay}"
+                                              Tag="{Binding}"
+                                              Checked="PickT2Lock_Changed"
+                                              Unchecked="PickT2Lock_Changed"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+
+                                    <ComboBox Grid.Column="4"
+                                              ItemsSource="{Binding Gods}"
+                                              SelectedItem="{Binding T2God, Mode=TwoWay}"
+                                              Tag="{Binding}"
+                                              SelectionChanged="PickT2God_Changed"
+                                              Margin="2,0"/>
+
+                                    <TextBlock Grid.Column="5" Text="{Binding RowNum}"
+                                               Foreground="{StaticResource GoldBrush}"
+                                               FontWeight="Bold" VerticalAlignment="Center"
+                                               HorizontalAlignment="Center"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <Button Content="RESET" Style="{StaticResource DangerButton}"
+                            HorizontalAlignment="Center" Margin="0,4,0,0" Padding="16,3"
+                            Click="BtnResetPicks_Click"/>
+                </StackPanel>
+            </Border>
+
+            <!-- ── BANS section ───────────────────────────────────────── -->
+            <Border DockPanel.Dock="Top" Style="{StaticResource GoldSection}">
+                <StackPanel>
+
+                    <TextBlock Text="BANS" Style="{StaticResource GoldHeading}"/>
+
+                    <!-- 5 paired ban rows -->
+                    <ItemsControl x:Name="BanPairList">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Height="30" Margin="0,1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="22"/>  <!-- T1 row# -->
+                                        <ColumnDefinition Width="*"/>   <!-- T1 combo -->
+                                        <ColumnDefinition Width="24"/>  <!-- T1 lock -->
+                                        <ColumnDefinition Width="24"/>  <!-- T2 lock -->
+                                        <ColumnDefinition Width="*"/>   <!-- T2 combo -->
+                                        <ColumnDefinition Width="22"/>  <!-- T2 row# -->
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0" Text="{Binding RowNum}"
+                                               Foreground="{StaticResource GoldBrush}"
+                                               FontWeight="Bold" VerticalAlignment="Center"
+                                               HorizontalAlignment="Center"/>
+
+                                    <ComboBox Grid.Column="1"
+                                              ItemsSource="{Binding Gods}"
+                                              SelectedItem="{Binding T1God, Mode=TwoWay}"
+                                              Tag="{Binding}"
+                                              SelectionChanged="BanT1God_Changed"
+                                              Margin="2,0"/>
+
+                                    <CheckBox Grid.Column="2"
+                                              IsChecked="{Binding T1Locked, Mode=TwoWay}"
+                                              Tag="{Binding}"
+                                              Checked="BanT1Lock_Changed"
+                                              Unchecked="BanT1Lock_Changed"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              ToolTip="Lock ban for data recording"/>
+
+                                    <CheckBox Grid.Column="3"
+                                              IsChecked="{Binding T2Locked, Mode=TwoWay}"
+                                              Tag="{Binding}"
+                                              Checked="BanT2Lock_Changed"
+                                              Unchecked="BanT2Lock_Changed"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              ToolTip="Lock ban for data recording"/>
+
+                                    <ComboBox Grid.Column="4"
+                                              ItemsSource="{Binding Gods}"
+                                              SelectedItem="{Binding T2God, Mode=TwoWay}"
+                                              Tag="{Binding}"
+                                              SelectionChanged="BanT2God_Changed"
+                                              Margin="2,0"/>
+
+                                    <TextBlock Grid.Column="5" Text="{Binding RowNum}"
+                                               Foreground="{StaticResource GoldBrush}"
+                                               FontWeight="Bold" VerticalAlignment="Center"
+                                               HorizontalAlignment="Center"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
+                        <Button Content="⇄" Style="{StaticResource OperatorButton}"
+                                Click="BtnSwapTeams_Click" Margin="0,0,6,0" Padding="12,3"
+                                ToolTip="Swap team sides"/>
+                        <Button Content="RESET" Style="{StaticResource DangerButton}"
+                                Click="BtnResetBans_Click" Padding="16,3"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+        </DockPanel>
+
+        <!-- ══ TEAM 2 column ═══════════════════════════════════════════════ -->
+        <DockPanel Grid.Column="2" Margin="6,0,0,0" LastChildFill="False">
+
+            <TextBlock DockPanel.Dock="Top" Text="TEAM 2"
+                       Style="{StaticResource TeamLabel}"
+                       HorizontalAlignment="Right"/>
+
+            <ComboBox  x:Name="CmbTeamTwo" DockPanel.Dock="Top"
+                       SelectionChanged="CmbTeamTwo_Changed" Margin="0,0,0,8"/>
+
+            <TextBlock DockPanel.Dock="Top" Text="SCORE"
+                       Style="{StaticResource SectionLabel}"
+                       HorizontalAlignment="Right"/>
+
+            <TextBox   x:Name="TxtRightScore" DockPanel.Dock="Top"
+                       Width="70" HorizontalAlignment="Right"
+                       Text="0" MaxLength="2"
+                       TextChanged="Score_Changed"/>
+        </DockPanel>
+
+        <!-- ══ Gold vertical divider ══════════════════════════════════════ -->
+        <Rectangle Grid.Column="3" Fill="{StaticResource GoldBrush}" Margin="6,0"/>
+
+        <!-- ══ RIGHT PANEL ════════════════════════════════════════════════ -->
+        <ScrollViewer Grid.Column="4" VerticalScrollBarVisibility="Auto" Margin="6,0,0,0">
+            <StackPanel>
+
+                <!-- ── PLAYERS ─────────────────────────────────────────── -->
+                <Border Style="{StaticResource GoldSection}">
+                    <StackPanel>
+                        <TextBlock Text="PLAYERS" Style="{StaticResource GoldHeading}"/>
+
+                        <!-- Column header -->
+                        <Grid Margin="0,0,0,2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="18"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="56"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="18"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="1" Text="TEAM 1" FontSize="9"
+                                       Foreground="{StaticResource GoldBrush}"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Grid.Column="3" Text="TEAM 2" FontSize="9"
+                                       Foreground="{StaticResource GoldBrush}"
+                                       HorizontalAlignment="Center"/>
+                        </Grid>
+
+                        <ItemsControl x:Name="PlayerRowList">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Height="26" Margin="0,1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="18"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="56"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="18"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Column="0" Text="{Binding RowNum}"
+                                                   Foreground="{StaticResource GoldBrush}"
+                                                   FontSize="10" VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center"/>
+
+                                        <TextBox Grid.Column="1"
+                                                 Text="{Binding T1Player, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                 Tag="{Binding}"
+                                                 LostFocus="PlayerT1_LostFocus"
+                                                 FontSize="11" Margin="2,0"/>
+
+                                        <TextBlock Grid.Column="2" Text="{Binding Role}"
+                                                   Foreground="{StaticResource GoldBrush}"
+                                                   FontSize="10" FontWeight="Bold"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+
+                                        <TextBox Grid.Column="3"
+                                                 Text="{Binding T2Player, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                 Tag="{Binding}"
+                                                 LostFocus="PlayerT2_LostFocus"
+                                                 FontSize="11" Margin="2,0"/>
+
+                                        <TextBlock Grid.Column="4" Text="{Binding RowNum}"
+                                                   Foreground="{StaticResource GoldBrush}"
+                                                   FontSize="10" VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <!-- ── BAN DATA ────────────────────────────────────────── -->
+                <Border Style="{StaticResource GoldSection}">
+                    <StackPanel>
+                        <TextBlock Text="BAN DATA" Style="{StaticResource GoldHeading}"/>
+                        <Button Content="SUBMIT BAN DATA"
+                                Style="{StaticResource OperatorButton}"
+                                Click="BtnSubmitBans_Click"
+                                HorizontalAlignment="Left" Padding="10,4" Margin="0,0,0,4"/>
+                        <TextBlock Text="VISIBILITY" FontSize="9"
+                                   Foreground="{StaticResource GoldBrush}" Margin="0,2,0,2"/>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox x:Name="ChkBanVisT1" Content="TEAM 1"
+                                      Foreground="{StaticResource GoldBrush}"
+                                      FontSize="10" IsChecked="True" Margin="0,0,10,0"/>
+                            <CheckBox x:Name="ChkBanVisT2" Content="TEAM 2"
+                                      Foreground="{StaticResource GoldBrush}"
+                                      FontSize="10" IsChecked="True"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- ── VARIOUS ─────────────────────────────────────────── -->
+                <Border Style="{StaticResource GoldSection}">
+                    <StackPanel>
+                        <TextBlock Text="VARIOUS" Style="{StaticResource GoldHeading}"/>
+
+                        <!-- Resources path -->
+                        <TextBlock Text="RESOURCES PATH" FontSize="9"
+                                   Foreground="{StaticResource GoldBrush}" Margin="0,2,0,2"/>
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="TxtResourcesPath" Grid.Column="0"
+                                     FontSize="10" IsReadOnly="True"/>
+                            <Button Grid.Column="1" Content="…"
+                                    Style="{StaticResource OperatorButton}"
+                                    Click="BtnBrowseResources_Click"
+                                    Padding="6,2" Margin="4,0,0,0"/>
+                        </Grid>
+
+                        <!-- Resolution -->
+                        <TextBlock Text="RESOLUTION" FontSize="9"
+                                   Foreground="{StaticResource GoldBrush}" Margin="0,2,0,2"/>
+                        <ComboBox x:Name="CmbResolution" Margin="0,0,0,6"
+                                  SelectionChanged="CmbResolution_Changed">
+                            <ComboBoxItem Content="1920 × 1080"/>
+                            <ComboBoxItem Content="2560 × 1440"/>
+                        </ComboBox>
+
+                        <!-- Show God Names (inline copy synced with top checkbox) -->
+                        <CheckBox x:Name="ChkShowGodNamesVarious" Content="SHOW GOD NAMES"
+                                  Foreground="{StaticResource GoldBrush}"
+                                  FontSize="10" IsChecked="True"
+                                  Checked="ChkShowGodNamesVarious_Changed"
+                                  Unchecked="ChkShowGodNamesVarious_Changed"
+                                  Margin="0,0,0,6"/>
+
+                        <!-- Window shortcuts -->
+                        <TextBlock Text="STREAM WINDOWS" FontSize="9"
+                                   Foreground="{StaticResource GoldBrush}" Margin="0,2,0,2"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <Button Content="P/B Display"
+                                    Style="{StaticResource OperatorButton}"
+                                    Click="BtnShowDisplay_Click"
+                                    FontSize="10" Padding="6,3" Margin="0,0,4,0"/>
+                            <Button Content="In-Game Overlay"
+                                    Style="{StaticResource OperatorButton}"
+                                    Click="BtnShowOverlay_Click"
+                                    FontSize="10" Padding="6,3"/>
+                        </StackPanel>
+
+                        <!-- Advanced section -->
+                        <Separator Background="{StaticResource GoldBrush}" Margin="0,4,0,4"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="Gods…"
+                                    Style="{StaticResource OperatorButton}"
+                                    Click="BtnGodManager_Click"
+                                    Padding="8,3" Margin="0,0,4,0" FontSize="10"/>
+                            <Button Content="Advanced Settings"
+                                    Style="{StaticResource OperatorButton}"
+                                    Click="BtnSettings_Click"
+                                    Padding="8,3" FontSize="10"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
             </StackPanel>
-        </Grid>
+        </ScrollViewer>
 
-    </DockPanel>
+    </Grid>
 </Window>
