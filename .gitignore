@@ -1,0 +1,13 @@
+# Claude Code local settings
+.claude/
+
+# .NET build output
+bin/
+obj/
+build/
+publish/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
