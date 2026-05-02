@@ -29,25 +29,25 @@ public partial class MainWindow : Window
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
-        App.Resources.Load(ConfigPath);
+        App.Loader.Load(ConfigPath);
 
         // Prompt for resources path if not yet configured
-        if (string.IsNullOrEmpty(App.Resources.Config.ResourcesPath) ||
-            App.Resources.VerifyResources().Count > 0)
+        if (string.IsNullOrEmpty(App.Loader.Config.ResourcesPath) ||
+            App.Loader.VerifyResources().Count > 0)
         {
             var settings = new SettingsWindow();
             settings.ShowDialog();
-            App.Resources.Load(ConfigPath);
+            App.Loader.Load(ConfigPath);
         }
 
-        _gods   = App.Resources.LoadGodList();
-        _layout = App.Resources.LoadLayout();
+        _gods   = App.Loader.LoadGodList();
+        _layout = App.Loader.LoadLayout();
 
         PopulateTeamCombos();
         BuildRowViewModels();
 
         _display = new DisplayWindow();
-        _display.ApplyLayout(_layout, App.Resources.Config);
+        _display.ApplyLayout(_layout, App.Loader.Config);
         _display.Show();
 
         // Offer to restore an autosaved draft
@@ -72,7 +72,7 @@ public partial class MainWindow : Window
 
     private void PopulateTeamCombos()
     {
-        var folders = App.Resources.GetTeamFolders();
+        var folders = App.Loader.GetTeamFolders();
         CmbTeamOne.ItemsSource = folders;
         CmbTeamTwo.ItemsSource = folders;
         if (folders.Count > 0) CmbTeamOne.SelectedIndex = 0;
@@ -83,8 +83,9 @@ public partial class MainWindow : Window
     {
         if (CmbTeamOne.SelectedItem is string folder)
         {
-            _teamOne = App.Resources.LoadTeam(folder);
-            _state.TeamOneName = _teamOne.TeamName;
+            _teamOne = App.Loader.LoadTeam(folder);
+            _state.TeamOneName       = _teamOne.TeamName;
+            _state.TeamOneFolderName = folder;
             RefreshDisplay();
         }
     }
@@ -93,8 +94,9 @@ public partial class MainWindow : Window
     {
         if (CmbTeamTwo.SelectedItem is string folder)
         {
-            _teamTwo = App.Resources.LoadTeam(folder);
-            _state.TeamTwoName = _teamTwo.TeamName;
+            _teamTwo = App.Loader.LoadTeam(folder);
+            _state.TeamTwoName       = _teamTwo.TeamName;
+            _state.TeamTwoFolderName = folder;
             RefreshDisplay();
         }
     }
@@ -129,7 +131,7 @@ public partial class MainWindow : Window
         if (sender is ComboBox cmb && cmb.Tag is BanRowVm vm)
         {
             vm.Slot.GodName = vm.GodName ?? string.Empty;
-            App.Audio.PlayHover(App.Resources.GetHoverSoundPath());
+            App.Audio.PlayHover(App.Loader.GetHoverSoundPath());
         }
         RefreshDisplay();
     }
@@ -149,8 +151,8 @@ public partial class MainWindow : Window
             if (vm.Slot.IsLocked)
             {
                 App.Audio.PlayLockIn(
-                    App.Resources.GetLockInSoundPath(),
-                    App.Resources.GetGodSoundPath(vm.Slot.GodName));
+                    App.Loader.GetLockInSoundPath(),
+                    App.Loader.GetGodSoundPath(vm.Slot.GodName));
             }
         }
         Autosave();
@@ -165,7 +167,7 @@ public partial class MainWindow : Window
         if (sender is ComboBox cmb && cmb.Tag is PickRowVm vm)
         {
             vm.Slot.GodName = vm.GodName ?? string.Empty;
-            App.Audio.PlayHover(App.Resources.GetHoverSoundPath());
+            App.Audio.PlayHover(App.Loader.GetHoverSoundPath());
         }
         RefreshDisplay();
     }
@@ -178,8 +180,8 @@ public partial class MainWindow : Window
             if (vm.Slot.IsLocked)
             {
                 App.Audio.PlayLockIn(
-                    App.Resources.GetLockInSoundPath(),
-                    App.Resources.GetGodSoundPath(vm.Slot.GodName));
+                    App.Loader.GetLockInSoundPath(),
+                    App.Loader.GetGodSoundPath(vm.Slot.GodName));
             }
         }
         Autosave();
@@ -194,9 +196,17 @@ public partial class MainWindow : Window
             MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
 
         _state.Clear();
-        // Re-apply team names since Clear() wipes them
-        if (_teamOne is not null) _state.TeamOneName = _teamOne.TeamName;
-        if (_teamTwo is not null) _state.TeamTwoName = _teamTwo.TeamName;
+        // Re-apply team names and folder names since Clear() wipes them
+        if (_teamOne is not null)
+        {
+            _state.TeamOneName       = _teamOne.TeamName;
+            _state.TeamOneFolderName = CmbTeamOne.SelectedItem as string ?? string.Empty;
+        }
+        if (_teamTwo is not null)
+        {
+            _state.TeamTwoName       = _teamTwo.TeamName;
+            _state.TeamTwoFolderName = CmbTeamTwo.SelectedItem as string ?? string.Empty;
+        }
 
         App.State.DeleteAutosave();
         _suppressRefresh = true;
@@ -226,12 +236,12 @@ public partial class MainWindow : Window
         if (_teamOne is not null)
         {
             _teamOne.RecordGame(_state.TeamOneBans);
-            App.Resources.SaveTeam(_teamOne);
+            App.Loader.SaveTeam(_teamOne);
         }
         if (_teamTwo is not null)
         {
             _teamTwo.RecordGame(_state.TeamTwoBans);
-            App.Resources.SaveTeam(_teamTwo);
+            App.Loader.SaveTeam(_teamTwo);
         }
 
         App.State.DeleteAutosave();
@@ -298,10 +308,10 @@ public partial class MainWindow : Window
         var win = new SettingsWindow();
         win.ShowDialog();
         // Reload everything in case the resources path or layout changed
-        App.Resources.Load(ConfigPath);
-        _gods   = App.Resources.LoadGodList();
-        _layout = App.Resources.LoadLayout();
-        _display?.ApplyLayout(_layout, App.Resources.Config);
+        App.Loader.Load(ConfigPath);
+        _gods   = App.Loader.LoadGodList();
+        _layout = App.Loader.LoadLayout();
+        _display?.ApplyLayout(_layout, App.Loader.Config);
         BuildRowViewModels();
         RefreshDisplay();
     }
@@ -328,11 +338,11 @@ public partial class MainWindow : Window
     private void RestoreState(DraftState saved)
     {
         _state = saved;
-        // Re-select teams in combos to reload team configs
-        if (CmbTeamOne.Items.Contains(saved.TeamOneName))
-            CmbTeamOne.SelectedItem = saved.TeamOneName;
-        if (CmbTeamTwo.Items.Contains(saved.TeamTwoName))
-            CmbTeamTwo.SelectedItem = saved.TeamTwoName;
+        // Combos are populated with folder names; use the saved folder name to re-select
+        if (!string.IsNullOrEmpty(saved.TeamOneFolderName) && CmbTeamOne.Items.Contains(saved.TeamOneFolderName))
+            CmbTeamOne.SelectedItem = saved.TeamOneFolderName;
+        if (!string.IsNullOrEmpty(saved.TeamTwoFolderName) && CmbTeamTwo.Items.Contains(saved.TeamTwoFolderName))
+            CmbTeamTwo.SelectedItem = saved.TeamTwoFolderName;
 
         TxtLeftScore.Text  = saved.TeamOneScore.ToString();
         TxtRightScore.Text = saved.TeamTwoScore.ToString();
@@ -342,19 +352,19 @@ public partial class MainWindow : Window
         // Re-apply saved slot values to the view models
         for (int i = 0; i < 5; i++)
         {
-            _t1Bans[i].GodName  = saved.TeamOneBans[i].GodName;
+            _t1Bans[i].GodName   = saved.TeamOneBans[i].GodName;
             _t1Bans[i].IsHovered = saved.TeamOneBans[i].IsHovered;
             _t1Bans[i].IsLocked  = saved.TeamOneBans[i].IsLocked;
 
-            _t2Bans[i].GodName  = saved.TeamTwoBans[i].GodName;
+            _t2Bans[i].GodName   = saved.TeamTwoBans[i].GodName;
             _t2Bans[i].IsHovered = saved.TeamTwoBans[i].IsHovered;
             _t2Bans[i].IsLocked  = saved.TeamTwoBans[i].IsLocked;
 
             _t1Picks[i].GodName  = saved.TeamOnePicks[i].GodName;
-            _t1Picks[i].IsLocked  = saved.TeamOnePicks[i].IsLocked;
+            _t1Picks[i].IsLocked = saved.TeamOnePicks[i].IsLocked;
 
             _t2Picks[i].GodName  = saved.TeamTwoPicks[i].GodName;
-            _t2Picks[i].IsLocked  = saved.TeamTwoPicks[i].IsLocked;
+            _t2Picks[i].IsLocked = saved.TeamTwoPicks[i].IsLocked;
         }
         _suppressRefresh = false;
         RefreshDisplay();

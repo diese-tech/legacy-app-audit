@@ -6,8 +6,10 @@ namespace SmitePnB.Models;
 /// </summary>
 public class DraftState
 {
-    public string TeamOneName { get; set; } = string.Empty;
-    public string TeamTwoName { get; set; } = string.Empty;
+    public string TeamOneName       { get; set; } = string.Empty;
+    public string TeamTwoName       { get; set; } = string.Empty;
+    public string TeamOneFolderName { get; set; } = string.Empty;
+    public string TeamTwoFolderName { get; set; } = string.Empty;
     public int TeamOneScore  { get; set; }
     public int TeamTwoScore  { get; set; }
 
@@ -21,8 +23,10 @@ public class DraftState
 
     public void Clear()
     {
-        TeamOneName  = string.Empty;
-        TeamTwoName  = string.Empty;
+        TeamOneName       = string.Empty;
+        TeamTwoName       = string.Empty;
+        TeamOneFolderName = string.Empty;
+        TeamTwoFolderName = string.Empty;
         TeamOneScore = 0;
         TeamTwoScore = 0;
         foreach (var s in TeamOnePicks) s.Clear();

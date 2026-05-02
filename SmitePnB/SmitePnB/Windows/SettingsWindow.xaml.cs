@@ -17,8 +17,8 @@ public partial class SettingsWindow : Window
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
-        _config = App.Resources.Config;
-        _layout = App.Resources.LoadLayout();
+        _config = App.Loader.Config;
+        _layout = App.Loader.LoadLayout();
 
         TxtResourcesPath.Text = _config.ResourcesPath;
         CmbResolution.SelectedIndex = _config.ResolutionIndex;
@@ -86,7 +86,7 @@ public partial class SettingsWindow : Window
         var path = Path.Combine(_config.ResourcesPath, "Display", "layout.json");
         if (!File.Exists(path))
         {
-            App.Resources.SaveLayout(new LayoutConfig());
+            App.Loader.SaveLayout(new LayoutConfig());
         }
         try { Process.Start(new ProcessStartInfo(path) { UseShellExecute = true }); }
         catch { System.Windows.MessageBox.Show("Could not open file.", "Error"); }
@@ -98,7 +98,7 @@ public partial class SettingsWindow : Window
             "Reset layout.json to default positions?", "Reset Layout",
             MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
         {
-            App.Resources.SaveLayout(new LayoutConfig());
+            App.Loader.SaveLayout(new LayoutConfig());
         }
     }
 
@@ -114,7 +114,7 @@ public partial class SettingsWindow : Window
         _config.ScoreColor     = TxtScoreColor.Text.Trim();
 
         // Validate resources path before saving
-        var problems = App.Resources.VerifyResources();
+        var problems = App.Loader.VerifyResources();
         if (problems.Count > 0)
         {
             TxtVerifyResult.Text       = "⚠ " + string.Join("\n⚠ ", problems);
@@ -132,8 +132,8 @@ public partial class SettingsWindow : Window
         if (roles.Length == 5)
             _layout.RoleLabels = roles;
 
-        App.Resources.SaveConfig(ConfigPath);
-        App.Resources.SaveLayout(_layout);
+        App.Loader.SaveConfig(ConfigPath);
+        App.Loader.SaveLayout(_layout);
 
         DialogResult = true;
         Close();

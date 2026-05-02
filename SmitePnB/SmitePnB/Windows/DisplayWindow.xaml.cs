@@ -40,8 +40,7 @@ public partial class DisplayWindow : Window
             _leftPicks[i]  = new PickSlotControl(); RootCanvas.Children.Add(_leftPicks[i]);
             _rightPicks[i] = new PickSlotControl(); RootCanvas.Children.Add(_rightPicks[i]);
         }
-        RootCanvas.Children.Add(LeftTopBansPanel);
-        RootCanvas.Children.Add(RightTopBansPanel);
+        // LeftTopBansPanel and RightTopBansPanel are declared in XAML — no add needed here
     }
 
     // ── Layout ────────────────────────────────────────────────────────────
@@ -130,12 +129,12 @@ public partial class DisplayWindow : Window
     {
         if (slot.IsLocked)
         {
-            ctrl.SetImage(App.Resources.GetBanImage(slot.GodName));
+            ctrl.SetImage(App.Loader.GetBanImage(slot.GodName));
             ctrl.SetState(BanSlotState.Locked);
         }
         else if (slot.IsHovered)
         {
-            ctrl.SetImage(App.Resources.GetBanImage(slot.GodName));
+            ctrl.SetImage(App.Loader.GetBanImage(slot.GodName));
             ctrl.SetState(BanSlotState.Hovered);
         }
         else
@@ -149,7 +148,7 @@ public partial class DisplayWindow : Window
     {
         if (slot.IsLocked)
         {
-            ctrl.SetImage(App.Resources.GetPickImage(slot.GodName));
+            ctrl.SetImage(App.Loader.GetPickImage(slot.GodName));
             ctrl.SetName(showName ? slot.GodName : null);
         }
         else
@@ -172,7 +171,7 @@ public partial class DisplayWindow : Window
         panel.Visibility = Visibility.Visible;
         foreach (var (godName, _) in team.GetTopBans(6))
         {
-            var img = App.Resources.GetTopBanImage(godName);
+            var img = App.Loader.GetTopBanImage(godName);
             if (img is null) continue;
             panel.Children.Add(new Image
             {
@@ -186,7 +185,7 @@ public partial class DisplayWindow : Window
 
     // ── Helpers ───────────────────────────────────────────────────────────
 
-    private static void SetCanvasPos(UIElement el, Models.Point p)
+    private static void SetCanvasPos(UIElement el, Models.LayoutPoint p)
     {
         Canvas.SetLeft(el, p.X);
         Canvas.SetTop(el,  p.Y);
