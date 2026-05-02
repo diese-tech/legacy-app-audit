@@ -25,6 +25,11 @@ jobs:
         run: >
           dotnet publish SmitePnB/SmitePnB/SmitePnB.csproj
           --configuration Release
+          --runtime win-x64
+          --self-contained true
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:EnableCompressionInSingleFile=true
           --output ./publish
 
       - name: Bundle exe + Resources into zip
