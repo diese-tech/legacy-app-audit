@@ -40,8 +40,9 @@
                       Checked="ChkShowGodNames_Changed" Unchecked="ChkShowGodNames_Changed"
                       VerticalAlignment="Center" Margin="4,0"/>
             <Separator/>
-            <Button x:Name="BtnSettings" Content="⚙ Settings" Style="{StaticResource OperatorButton}" Click="BtnSettings_Click"/>
-            <Button x:Name="BtnAbout"    Content="About"      Style="{StaticResource OperatorButton}" Click="BtnAbout_Click"/>
+            <Button x:Name="BtnGodManager" Content="Gods…"     Style="{StaticResource OperatorButton}" Click="BtnGodManager_Click" ToolTip="Add or remove gods, check which assets are present"/>
+            <Button x:Name="BtnSettings"   Content="⚙ Settings" Style="{StaticResource OperatorButton}" Click="BtnSettings_Click"/>
+            <Button x:Name="BtnAbout"      Content="About"      Style="{StaticResource OperatorButton}" Click="BtnAbout_Click"/>
         </ToolBar>
 
         <!-- ── Score row ───────────────────────────────────────────────── -->

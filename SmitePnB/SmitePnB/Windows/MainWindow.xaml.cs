@@ -303,6 +303,17 @@ public partial class MainWindow : Window
     private void ChkShowGodNames_Changed(object sender, RoutedEventArgs e)
         => RefreshDisplay();
 
+    private void BtnGodManager_Click(object sender, RoutedEventArgs e)
+    {
+        var win = new GodManagerWindow { Owner = this };
+        win.ShowDialog();
+        if (win.GodListChanged)
+        {
+            _gods = App.Loader.LoadGodList();
+            BuildRowViewModels();
+        }
+    }
+
     private void BtnSettings_Click(object sender, RoutedEventArgs e)
     {
         var win = new SettingsWindow();

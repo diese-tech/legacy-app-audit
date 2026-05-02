@@ -195,12 +195,95 @@ public class ResourceLoader
         catch { return null; }
     }
 
+    // ── God management ────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Asset presence for every god in CharactersList.txt.
+    /// Used by GodManagerWindow to show the operator what is missing.
+    /// </summary>
+    public record GodAssetStatus(string Name, bool HasPick, bool HasBan, bool HasTopBan, bool HasSound);
+
+    public List<GodAssetStatus> GetAllGodAssetStatus()
+    {
+        return LoadGodList().Select(name => new GodAssetStatus(
+            name,
+            File.Exists(Path.Combine(_config.ResourcesPath, "CharacterImages", "Picks",   name + ".png")),
+            File.Exists(Path.Combine(_config.ResourcesPath, "CharacterImages", "Bans",    name + ".png")),
+            File.Exists(Path.Combine(_config.ResourcesPath, "CharacterImages", "TopBans", name + ".png")),
+            File.Exists(Path.Combine(_config.ResourcesPath, "Sounds", name + ".mp3")) ||
+            File.Exists(Path.Combine(_config.ResourcesPath, "Sounds", name + ".wav"))
+        )).ToList();
+    }
+
+    /// <summary>
+    /// Adds a god: copies the provided asset files to the correct sub-folders,
+    /// appends the name to CharactersList.txt, and clears the image cache.
+    /// Any of the asset paths may be null — the app is fail-soft for missing assets.
+    /// Returns false and sets <paramref name="error"/> if the name is blank or already exists.
+    /// </summary>
+    public bool TryAddGod(string name, string? pickPath, string? banPath, string? topBanPath, string? soundPath, out string error)
+    {
+        name = name.Trim();
+        if (string.IsNullOrEmpty(name)) { error = "Name cannot be empty."; return false; }
+
+        var existing = LoadGodList();
+        if (existing.Contains(name, StringComparer.OrdinalIgnoreCase))
+        {
+            error = $"'{name}' already exists in the god list.";
+            return false;
+        }
+
+        try
+        {
+            if (pickPath   != null) File.Copy(pickPath,   Path.Combine(_config.ResourcesPath, "CharacterImages", "Picks",   name + ".png"), overwrite: true);
+            if (banPath    != null) File.Copy(banPath,    Path.Combine(_config.ResourcesPath, "CharacterImages", "Bans",    name + ".png"), overwrite: true);
+            if (topBanPath != null) File.Copy(topBanPath, Path.Combine(_config.ResourcesPath, "CharacterImages", "TopBans", name + ".png"), overwrite: true);
+            if (soundPath  != null)
+            {
+                var ext  = Path.GetExtension(soundPath).ToLowerInvariant();
+                var dest = Path.Combine(_config.ResourcesPath, "Sounds", name + ext);
+                File.Copy(soundPath, dest, overwrite: true);
+            }
+
+            File.AppendAllLines(Path.Combine(_config.ResourcesPath, "CharactersList.txt"), [name]);
+            _imageCache.Clear();
+            error = string.Empty;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Removes a god from CharactersList.txt.
+    /// Asset files are intentionally left on disk — the operator can re-add the god later
+    /// without having to re-import the images.
+    /// </summary>
+    public void RemoveGod(string name)
+    {
+        var listPath = Path.Combine(_config.ResourcesPath, "CharactersList.txt");
+        if (!File.Exists(listPath)) return;
+
+        var lines = File.ReadAllLines(listPath)
+                        .Where(l => !l.Trim().Equals(name, StringComparison.OrdinalIgnoreCase))
+                        .ToArray();
+        File.WriteAllLines(listPath, lines);
+        _imageCache.Clear();
+    }
+
     // ── Sounds ────────────────────────────────────────────────────────────
 
     public string? GetGodSoundPath(string godName)
     {
-        var path = Path.Combine(_config.ResourcesPath, "Sounds", godName + ".mp3");
-        return File.Exists(path) ? path : null;
+        foreach (var ext in new[] { ".mp3", ".wav" })
+        {
+            var path = Path.Combine(_config.ResourcesPath, "Sounds", godName + ext);
+            if (File.Exists(path)) return path;
+        }
+        return null;
     }
 
     public string? GetHoverSoundPath()

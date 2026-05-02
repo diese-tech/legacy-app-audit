@@ -1,0 +1,200 @@
+<Window x:Class="SmitePnB.Windows.GodManagerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="God Manager"
+        Background="{StaticResource PanelBg}"
+        Foreground="{StaticResource TextPrimary}"
+        Width="660" Height="700"
+        MinWidth="580" MinHeight="500"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize"
+        Loaded="Window_Loaded">
+
+    <Window.Resources>
+        <Style TargetType="TextBox">
+            <Setter Property="Background"  Value="{StaticResource ControlBg}"/>
+            <Setter Property="Foreground"  Value="{StaticResource TextPrimary}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="Padding"     Value="4,2"/>
+        </Style>
+        <Style x:Key="StatusOk" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#4CAF50"/>
+            <Setter Property="FontSize"   Value="14"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment"   Value="Center"/>
+        </Style>
+        <Style x:Key="StatusMissing" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#EF5350"/>
+            <Setter Property="FontSize"   Value="14"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment"   Value="Center"/>
+        </Style>
+    </Window.Resources>
+
+    <DockPanel Margin="14">
+
+        <!-- ── Close button ──────────────────────────────────────────────── -->
+        <Button DockPanel.Dock="Bottom" Content="Close" Width="80"
+                HorizontalAlignment="Right" Margin="0,10,0,0"
+                Style="{StaticResource OperatorButton}" Click="BtnClose_Click"/>
+
+        <!-- ── Add New God panel ─────────────────────────────────────────── -->
+        <Border DockPanel.Dock="Top"
+                Background="{StaticResource ControlBg}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="1" CornerRadius="3"
+                Padding="10" Margin="0,0,0,10">
+            <StackPanel>
+                <TextBlock Text="ADD NEW GOD" Style="{StaticResource SectionLabel}"/>
+
+                <!-- Name row -->
+                <Grid Margin="0,4,0,6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Name:" VerticalAlignment="Center"/>
+                    <TextBox   x:Name="TxtNewGodName" Grid.Column="1"/>
+                </Grid>
+
+                <!-- Asset rows -->
+                <Grid Margin="0,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110"/>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Pick Image:" VerticalAlignment="Center" Foreground="{StaticResource TextMuted}"/>
+                    <Button    x:Name="BtnPickImage"   Grid.Column="1" Content="Browse…" Style="{StaticResource OperatorButton}" Click="BtnPickImage_Click"/>
+                    <TextBlock x:Name="LblPickFile"    Grid.Column="2" Text="no file selected" Foreground="{StaticResource TextMuted}" FontSize="11" VerticalAlignment="Center" Margin="6,0,0,0" TextTrimming="CharacterEllipsis"/>
+                </Grid>
+                <Grid Margin="0,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110"/>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Ban Image:" VerticalAlignment="Center" Foreground="{StaticResource TextMuted}"/>
+                    <Button    x:Name="BtnBanImage"    Grid.Column="1" Content="Browse…" Style="{StaticResource OperatorButton}" Click="BtnBanImage_Click"/>
+                    <TextBlock x:Name="LblBanFile"     Grid.Column="2" Text="no file selected" Foreground="{StaticResource TextMuted}" FontSize="11" VerticalAlignment="Center" Margin="6,0,0,0" TextTrimming="CharacterEllipsis"/>
+                </Grid>
+                <Grid Margin="0,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110"/>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="TopBan Image:" VerticalAlignment="Center" Foreground="{StaticResource TextMuted}"/>
+                    <Button    x:Name="BtnTopBanImage" Grid.Column="1" Content="Browse…" Style="{StaticResource OperatorButton}" Click="BtnTopBanImage_Click"/>
+                    <TextBlock x:Name="LblTopBanFile"  Grid.Column="2" Text="no file selected" Foreground="{StaticResource TextMuted}" FontSize="11" VerticalAlignment="Center" Margin="6,0,0,0" TextTrimming="CharacterEllipsis"/>
+                </Grid>
+                <Grid Margin="0,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110"/>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Sound File:" VerticalAlignment="Center" Foreground="{StaticResource TextMuted}"/>
+                    <Button    x:Name="BtnSoundFile"   Grid.Column="1" Content="Browse…" Style="{StaticResource OperatorButton}" Click="BtnSoundFile_Click"/>
+                    <TextBlock x:Name="LblSoundFile"   Grid.Column="2" Text="no file selected" Foreground="{StaticResource TextMuted}" FontSize="11" VerticalAlignment="Center" Margin="6,0,0,0" TextTrimming="CharacterEllipsis"/>
+                </Grid>
+
+                <!-- Add button + status message -->
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <Button Content="Add God" Width="90"
+                            Style="{StaticResource OperatorButton}" Click="BtnAddGod_Click"/>
+                    <TextBlock x:Name="TxtAddStatus" VerticalAlignment="Center"
+                               Margin="10,0,0,0" FontSize="12" TextWrapping="Wrap"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- ── God list ───────────────────────────────────────────────────── -->
+        <DockPanel>
+
+            <!-- Header row -->
+            <Grid DockPanel.Dock="Top" Margin="0,0,0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="160"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock x:Name="TxtGodCount" Grid.Column="0"
+                           VerticalAlignment="Center" Foreground="{StaticResource TextMuted}" FontSize="12"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock Text="Search: " VerticalAlignment="Center" Foreground="{StaticResource TextMuted}" FontSize="12"/>
+                    <TextBox   x:Name="TxtSearch" Width="110" TextChanged="TxtSearch_Changed"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Column headers -->
+            <Grid DockPanel.Dock="Top" Margin="0,0,17,0" Background="{StaticResource ControlBg}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="55"/>
+                    <ColumnDefinition Width="70"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="God Name"  Padding="6,4" Foreground="{StaticResource TextMuted}" FontSize="11"/>
+                <TextBlock Grid.Column="1" Text="Pick"      Padding="4"   Foreground="{StaticResource TextMuted}" FontSize="11" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Column="2" Text="Ban"       Padding="4"   Foreground="{StaticResource TextMuted}" FontSize="11" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Column="3" Text="TopBan"    Padding="4"   Foreground="{StaticResource TextMuted}" FontSize="11" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Column="4" Text="Sound"     Padding="4"   Foreground="{StaticResource TextMuted}" FontSize="11" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Column="5"                  Padding="4"/>
+            </Grid>
+
+            <!-- Scrollable god rows -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ItemsControl x:Name="GodList">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="55"/>
+                                    <ColumnDefinition Width="70"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{Binding Name}" Padding="6,5" VerticalAlignment="Center"/>
+
+                                <!-- Pick -->
+                                <TextBlock Grid.Column="1" Style="{StaticResource StatusOk}"
+                                           Text="✓" Visibility="{Binding PickOkVisibility}"/>
+                                <TextBlock Grid.Column="1" Style="{StaticResource StatusMissing}"
+                                           Text="✗" Visibility="{Binding PickMissingVisibility}"/>
+
+                                <!-- Ban -->
+                                <TextBlock Grid.Column="2" Style="{StaticResource StatusOk}"
+                                           Text="✓" Visibility="{Binding BanOkVisibility}"/>
+                                <TextBlock Grid.Column="2" Style="{StaticResource StatusMissing}"
+                                           Text="✗" Visibility="{Binding BanMissingVisibility}"/>
+
+                                <!-- TopBan -->
+                                <TextBlock Grid.Column="3" Style="{StaticResource StatusOk}"
+                                           Text="✓" Visibility="{Binding TopBanOkVisibility}"/>
+                                <TextBlock Grid.Column="3" Style="{StaticResource StatusMissing}"
+                                           Text="✗" Visibility="{Binding TopBanMissingVisibility}"/>
+
+                                <!-- Sound -->
+                                <TextBlock Grid.Column="4" Style="{StaticResource StatusOk}"
+                                           Text="✓" Visibility="{Binding SoundOkVisibility}"/>
+                                <TextBlock Grid.Column="4" Style="{StaticResource StatusMissing}"
+                                           Text="✗" Visibility="{Binding SoundMissingVisibility}"/>
+
+                                <Button Grid.Column="5" Content="Remove"
+                                        Style="{StaticResource DangerButton}"
+                                        Tag="{Binding Name}"
+                                        Margin="4,2" Padding="4,2" FontSize="11"
+                                        Click="BtnRemoveGod_Click"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </DockPanel>
+
+    </DockPanel>
+</Window>
