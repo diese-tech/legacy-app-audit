@@ -15,7 +15,8 @@ public partial class MainWindow : Window
     private TeamConfig?  _teamTwo;
     private LayoutConfig _layout  = new();
     private List<string> _gods    = [];
-    private DisplayWindow? _display;
+    private DisplayWindow?        _display;
+    private InGameOverlayWindow?  _overlay;
 
     // View models bound to the ItemsControls
     private readonly List<BanRowVm>  _t1Bans  = [];
@@ -46,9 +47,14 @@ public partial class MainWindow : Window
         PopulateTeamCombos();
         BuildRowViewModels();
 
+        // Open the two stream-facing output windows
         _display = new DisplayWindow();
         _display.ApplyLayout(_layout, App.Loader.Config);
         _display.Show();
+
+        _overlay = new InGameOverlayWindow();
+        _overlay.ApplyLayout(_layout, App.Loader.Config);
+        _overlay.Show();
 
         // Offer to restore an autosaved draft
         var saved = App.State.TryLoadAutosave();
@@ -66,6 +72,7 @@ public partial class MainWindow : Window
     private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
     {
         _display?.Close();
+        _overlay?.Close();
     }
 
     // ── Team population ───────────────────────────────────────────────────
@@ -217,8 +224,8 @@ public partial class MainWindow : Window
 
     private void BtnSubmitBans_Click(object sender, RoutedEventArgs e)
     {
-        var lockedOneBans  = _state.TeamOneBans.Count(b => b.IsLocked);
-        var lockedTwoBans  = _state.TeamTwoBans.Count(b => b.IsLocked);
+        var lockedOneBans = _state.TeamOneBans.Count(b => b.IsLocked);
+        var lockedTwoBans = _state.TeamTwoBans.Count(b => b.IsLocked);
 
         if (lockedOneBans == 0 && lockedTwoBans == 0)
         {
@@ -250,7 +257,6 @@ public partial class MainWindow : Window
 
     private void BtnSwapTeams_Click(object sender, RoutedEventArgs e)
     {
-        // Swap combo selections — the changed events will reload team configs
         var idxOne = CmbTeamOne.SelectedIndex;
         var idxTwo = CmbTeamTwo.SelectedIndex;
         CmbTeamOne.SelectedIndex = idxTwo;
@@ -295,8 +301,6 @@ public partial class MainWindow : Window
 
     private void Score_Changed(object sender, TextChangedEventArgs e)
     {
-        // WPF can fire TextChanged while the window is still being constructed,
-        // before both score text boxes are available.
         if (TxtLeftScore is null || TxtRightScore is null)
             return;
 
@@ -328,8 +332,25 @@ public partial class MainWindow : Window
         _gods   = App.Loader.LoadGodList();
         _layout = App.Loader.LoadLayout();
         _display?.ApplyLayout(_layout, App.Loader.Config);
+        _overlay?.ApplyLayout(_layout, App.Loader.Config);
         BuildRowViewModels();
         RefreshDisplay();
+    }
+
+    private void BtnShowDisplay_Click(object sender, RoutedEventArgs e)
+    {
+        if (_display is null) return;
+        if (_display.WindowState == WindowState.Minimized)
+            _display.WindowState = WindowState.Normal;
+        _display.Activate();
+    }
+
+    private void BtnShowOverlay_Click(object sender, RoutedEventArgs e)
+    {
+        if (_overlay is null) return;
+        if (_overlay.WindowState == WindowState.Minimized)
+            _overlay.WindowState = WindowState.Normal;
+        _overlay.Activate();
     }
 
     private void BtnAbout_Click(object sender, RoutedEventArgs e)
@@ -345,8 +366,10 @@ public partial class MainWindow : Window
 
     private void RefreshDisplay()
     {
-        if (_suppressRefresh || _display is null) return;
-        _display.Refresh(_state, _teamOne, _teamTwo, ChkShowGodNames.IsChecked == true);
+        if (_suppressRefresh) return;
+        var showNames = ChkShowGodNames.IsChecked == true;
+        _display?.Refresh(_state, _teamOne, _teamTwo, showNames);
+        _overlay?.Refresh(_state, _teamOne, _teamTwo, showNames);
     }
 
     private void Autosave() => App.State.Autosave(_state);
@@ -354,7 +377,6 @@ public partial class MainWindow : Window
     private void RestoreState(DraftState saved)
     {
         _state = saved;
-        // Combos are populated with folder names; use the saved folder name to re-select
         if (!string.IsNullOrEmpty(saved.TeamOneFolderName) && CmbTeamOne.Items.Contains(saved.TeamOneFolderName))
             CmbTeamOne.SelectedItem = saved.TeamOneFolderName;
         if (!string.IsNullOrEmpty(saved.TeamTwoFolderName) && CmbTeamTwo.Items.Contains(saved.TeamTwoFolderName))
@@ -365,7 +387,6 @@ public partial class MainWindow : Window
 
         _suppressRefresh = true;
         BuildRowViewModels();
-        // Re-apply saved slot values to the view models
         for (int i = 0; i < 5; i++)
         {
             _t1Bans[i].GodName   = saved.TeamOneBans[i].GodName;
@@ -388,8 +409,6 @@ public partial class MainWindow : Window
 }
 
 // ── Row view models ───────────────────────────────────────────────────────
-// Simple data holders for the ItemsControl templates. Not full MVVM —
-// the operator control panel doesn't need the overhead.
 
 public class BanRowVm
 {

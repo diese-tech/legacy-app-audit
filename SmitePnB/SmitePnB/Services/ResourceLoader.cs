@@ -173,6 +173,27 @@ public class ResourceLoader
     public BitmapImage? GetBanImage(string godName)    => LoadImage(Path.Combine("CharacterImages", "Bans",    godName + ".png"));
     public BitmapImage? GetTopBanImage(string godName) => LoadImage(Path.Combine("CharacterImages", "TopBans", godName + ".png"));
 
+    // Right-side ban variant (godName_Right.png); falls back to standard ban image
+    public BitmapImage? GetBanImageRight(string godName)
+        => LoadImage(Path.Combine("CharacterImages", "Bans", godName + "_Right.png"))
+           ?? GetBanImage(godName);
+
+    // Layout template background (shared across all P/B displays)
+    public BitmapImage? GetLayoutTemplate()
+        => LoadImage(Path.Combine("Display", "LayoutTemplate.png"));
+
+    // Team-specific P/B Display side panels
+    public BitmapImage? GetTeamPnBLeft(string teamFolderName)
+        => LoadImage(Path.Combine("Teams", teamFolderName, "PnBLeft.png"));
+    public BitmapImage? GetTeamPnBRight(string teamFolderName)
+        => LoadImage(Path.Combine("Teams", teamFolderName, "PnBRight.png"));
+
+    // Team-specific In-Game Overlay art panels
+    public BitmapImage? GetTeamArtLeft(string teamFolderName)
+        => LoadImage(Path.Combine("Teams", teamFolderName, "Left.png"));
+    public BitmapImage? GetTeamArtRight(string teamFolderName)
+        => LoadImage(Path.Combine("Teams", teamFolderName, "Right.png"));
+
     private BitmapImage? LoadImage(string relativePath)
     {
         if (_imageCache.TryGetValue(relativePath, out var cached))

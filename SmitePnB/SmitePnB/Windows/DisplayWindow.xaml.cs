@@ -7,8 +7,8 @@ using SmitePnB.Models;
 namespace SmitePnB.Windows;
 
 /// <summary>
-/// The window OBS captures via window_capture.
-/// Receives updates by calling Refresh() from MainWindow — no polling, no timers.
+/// The P/B Display window — captured by OBS via window_capture.
+/// Receives updates by calling Refresh() from MainWindow; no polling, no timers.
 /// All layout positions come from LayoutConfig so the operator can reposition
 /// elements without touching code.
 /// </summary>
@@ -40,7 +40,6 @@ public partial class DisplayWindow : Window
             _leftPicks[i]  = new PickSlotControl(); RootCanvas.Children.Add(_leftPicks[i]);
             _rightPicks[i] = new PickSlotControl(); RootCanvas.Children.Add(_rightPicks[i]);
         }
-        // LeftTopBansPanel and RightTopBansPanel are declared in XAML — no add needed here
     }
 
     // ── Layout ────────────────────────────────────────────────────────────
@@ -53,6 +52,19 @@ public partial class DisplayWindow : Window
         var (w, h) = AppConfig.GetResolutionSize(config.ResolutionIndex);
         Width  = w;
         Height = h;
+
+        // Background template image — stretches to fill the full window
+        LayoutBg.Width  = w;
+        LayoutBg.Height = h;
+        LayoutBg.Source = App.Loader.GetLayoutTemplate();
+
+        // P/B side panel images — sized and positioned from layout
+        PnBLeftImg.Width   = layout.PnBPanelSize.Width;
+        PnBLeftImg.Height  = layout.PnBPanelSize.Height;
+        PnBRightImg.Width  = layout.PnBPanelSize.Width;
+        PnBRightImg.Height = layout.PnBPanelSize.Height;
+        SetCanvasPos(PnBLeftImg,  layout.PnBLeftPanel);
+        SetCanvasPos(PnBRightImg, layout.PnBRightPanel);
 
         // Apply slot sizes
         foreach (var s in _leftBans.Concat(_rightBans))
@@ -79,12 +91,12 @@ public partial class DisplayWindow : Window
         }
 
         // Team panels, names, scores, top bans
-        SetCanvasPos(LeftTeamName,     layout.LeftTeamName);
-        SetCanvasPos(RightTeamName,    layout.RightTeamName);
-        SetCanvasPos(LeftScore,        layout.LeftScore);
-        SetCanvasPos(RightScore,       layout.RightScore);
-        SetCanvasPos(LeftTopBansPanel, layout.LeftTopBans);
-        SetCanvasPos(RightTopBansPanel,layout.RightTopBans);
+        SetCanvasPos(LeftTeamName,      layout.LeftTeamName);
+        SetCanvasPos(RightTeamName,     layout.RightTeamName);
+        SetCanvasPos(LeftScore,         layout.LeftScore);
+        SetCanvasPos(RightScore,        layout.RightScore);
+        SetCanvasPos(LeftTopBansPanel,  layout.LeftTopBans);
+        SetCanvasPos(RightTopBansPanel, layout.RightTopBans);
 
         // Font and colors from AppConfig
         var font       = new FontFamily(config.FontFamily);
@@ -114,10 +126,14 @@ public partial class DisplayWindow : Window
         LeftScore.Text     = state.TeamOneScore.ToString();
         RightScore.Text    = state.TeamTwoScore.ToString();
 
+        // Update team-specific P/B side panels
+        PnBLeftImg.Source  = teamOne is not null ? App.Loader.GetTeamPnBLeft(teamOne.FolderName)   : null;
+        PnBRightImg.Source = teamTwo is not null ? App.Loader.GetTeamPnBRight(teamTwo.FolderName)  : null;
+
         for (int i = 0; i < 5; i++)
         {
-            UpdateBanSlot(_leftBans[i],   state.TeamOneBans[i]);
-            UpdateBanSlot(_rightBans[i],  state.TeamTwoBans[i]);
+            UpdateBanSlot(_leftBans[i],   state.TeamOneBans[i], rightSide: false);
+            UpdateBanSlot(_rightBans[i],  state.TeamTwoBans[i], rightSide: true);
             UpdatePickSlot(_leftPicks[i],  state.TeamOnePicks[i], showGodNames);
             UpdatePickSlot(_rightPicks[i], state.TeamTwoPicks[i], showGodNames);
         }
@@ -125,16 +141,20 @@ public partial class DisplayWindow : Window
         RefreshTopBans(teamOne, teamTwo);
     }
 
-    private void UpdateBanSlot(BanSlotControl ctrl, BanSlot slot)
+    private void UpdateBanSlot(BanSlotControl ctrl, BanSlot slot, bool rightSide)
     {
         if (slot.IsLocked)
         {
-            ctrl.SetImage(App.Loader.GetBanImage(slot.GodName));
+            ctrl.SetImage(rightSide
+                ? App.Loader.GetBanImageRight(slot.GodName)
+                : App.Loader.GetBanImage(slot.GodName));
             ctrl.SetState(BanSlotState.Locked);
         }
         else if (slot.IsHovered)
         {
-            ctrl.SetImage(App.Loader.GetBanImage(slot.GodName));
+            ctrl.SetImage(rightSide
+                ? App.Loader.GetBanImageRight(slot.GodName)
+                : App.Loader.GetBanImage(slot.GodName));
             ctrl.SetState(BanSlotState.Hovered);
         }
         else
@@ -175,9 +195,9 @@ public partial class DisplayWindow : Window
             if (img is null) continue;
             panel.Children.Add(new Image
             {
-                Source = img,
-                Width  = _layout.BanSlot.Width,
-                Height = _layout.BanSlot.Height,
+                Source  = img,
+                Width   = _layout.BanSlot.Width,
+                Height  = _layout.BanSlot.Height,
                 Stretch = Stretch.Uniform
             });
         }
