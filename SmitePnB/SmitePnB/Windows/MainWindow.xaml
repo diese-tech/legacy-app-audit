@@ -1,7 +1,7 @@
 <Window x:Class="SmitePnB.Windows.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="SmitePnB — Operator Control"
+        Title="Settings"
         Background="{StaticResource PanelBg}"
         Foreground="{StaticResource TextPrimary}"
         Width="960" Height="780"
@@ -41,7 +41,11 @@
                       VerticalAlignment="Center" Margin="4,0"/>
             <Separator/>
             <Button x:Name="BtnGodManager" Content="Gods…"     Style="{StaticResource OperatorButton}" Click="BtnGodManager_Click" ToolTip="Add or remove gods, check which assets are present"/>
-            <Button x:Name="BtnSettings"   Content="⚙ Settings" Style="{StaticResource OperatorButton}" Click="BtnSettings_Click"/>
+            <Button x:Name="BtnSettings"   Content="⚙ Config"  Style="{StaticResource OperatorButton}" Click="BtnSettings_Click" ToolTip="App configuration: paths, colors, layout"/>
+            <Separator/>
+            <Button x:Name="BtnShowDisplay" Content="P/B Display"      Style="{StaticResource OperatorButton}" Click="BtnShowDisplay_Click"  ToolTip="Bring the P/B Display stream window to front"/>
+            <Button x:Name="BtnShowOverlay" Content="In-Game Overlay"  Style="{StaticResource OperatorButton}" Click="BtnShowOverlay_Click"  ToolTip="Bring the In-Game Overlay stream window to front"/>
+            <Separator/>
             <Button x:Name="BtnAbout"      Content="About"      Style="{StaticResource OperatorButton}" Click="BtnAbout_Click"/>
         </ToolBar>
 
