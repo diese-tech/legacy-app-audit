@@ -1,0 +1,45 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Run tests
+        run: dotnet test SmitePnB/SmitePnB.sln --configuration Release
+        continue-on-error: false
+
+      - name: Publish self-contained exe
+        run: >
+          dotnet publish SmitePnB/SmitePnB/SmitePnB.csproj
+          --configuration Release
+          --output ./publish
+
+      # Always upload the exe as a workflow artifact so developers can grab
+      # the latest build from the Actions tab without needing a tagged release.
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SmitePnB
+          path: ./publish/SmitePnB.exe
+          retention-days: 30
+
+      # On a tagged push (e.g. v1.2.0), create a GitHub Release and attach the exe.
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./publish/SmitePnB.exe
+          generate_release_notes: true

@@ -16,12 +16,18 @@ appear, when picks lock in, when audio callouts play. Nothing is automated.
 
 ---
 
+## Download
+
+**[→ Latest release](../../releases/latest)**
+
+Download `SmitePnB.exe` from the Releases page. No installer, no runtime — just the exe.
+
+---
+
 ## What you need
 
 - Windows 10 or 11
 - OBS Studio
-
-No runtime install required. The app is fully self-contained — everything it needs is bundled inside the `.exe`.
 
 ---
 
