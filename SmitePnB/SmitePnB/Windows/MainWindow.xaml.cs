@@ -295,7 +295,12 @@ public partial class MainWindow : Window
 
     private void Score_Changed(object sender, TextChangedEventArgs e)
     {
-        if (int.TryParse(TxtLeftScore.Text,  out var l)) _state.TeamOneScore = l;
+        // WPF can fire TextChanged while the window is still being constructed,
+        // before both score text boxes are available.
+        if (TxtLeftScore is null || TxtRightScore is null)
+            return;
+
+        if (int.TryParse(TxtLeftScore.Text, out var l)) _state.TeamOneScore = l;
         if (int.TryParse(TxtRightScore.Text, out var r)) _state.TeamTwoScore = r;
         RefreshDisplay();
     }

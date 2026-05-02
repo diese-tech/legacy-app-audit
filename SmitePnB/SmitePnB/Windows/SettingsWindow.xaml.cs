@@ -11,6 +11,8 @@ public partial class SettingsWindow : Window
 {
     private static readonly string ConfigPath =
         Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
+    private static readonly string DefaultResourcesPath =
+        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources");
 
     private AppConfig    _config = new();
     private LayoutConfig _layout = new();
@@ -19,6 +21,9 @@ public partial class SettingsWindow : Window
     {
         _config = App.Loader.Config;
         _layout = App.Loader.LoadLayout();
+
+        if (string.IsNullOrWhiteSpace(_config.ResourcesPath) && Directory.Exists(DefaultResourcesPath))
+            _config.ResourcesPath = DefaultResourcesPath;
 
         TxtResourcesPath.Text = _config.ResourcesPath;
         CmbResolution.SelectedIndex = _config.ResolutionIndex;
@@ -67,6 +72,11 @@ public partial class SettingsWindow : Window
 
     private void UpdateSwatches()
     {
+        // WPF may fire TextChanged while the dialog is still being constructed.
+        if (TxtGodNameColor is null || TxtTeamNameColor is null || TxtScoreColor is null ||
+            SwatchGodName is null || SwatchTeamName is null || SwatchScore is null)
+            return;
+
         SwatchGodName.Fill  = BrushFromHex(TxtGodNameColor.Text);
         SwatchTeamName.Fill = BrushFromHex(TxtTeamNameColor.Text);
         SwatchScore.Fill    = BrushFromHex(TxtScoreColor.Text);
