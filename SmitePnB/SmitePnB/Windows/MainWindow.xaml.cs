@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using Microsoft.Win32;
 using SmitePnB.Models;
 using SmitePnB.Services;
 
@@ -10,6 +11,8 @@ public partial class MainWindow : Window
     private static readonly string ConfigPath =
         System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
 
+    public MainWindow() { InitializeComponent(); }
+
     private DraftState   _state   = new();
     private TeamConfig?  _teamOne;
     private TeamConfig?  _teamTwo;
@@ -18,11 +21,9 @@ public partial class MainWindow : Window
     private DisplayWindow?        _display;
     private InGameOverlayWindow?  _overlay;
 
-    // View models bound to the ItemsControls
-    private readonly List<BanRowVm>  _t1Bans  = [];
-    private readonly List<BanRowVm>  _t2Bans  = [];
-    private readonly List<PickRowVm> _t1Picks = [];
-    private readonly List<PickRowVm> _t2Picks = [];
+    private readonly List<PickPairVm>  _pickPairs  = [];
+    private readonly List<BanPairVm>   _banPairs   = [];
+    private readonly List<PlayerRowVm> _playerRows = [];
 
     private bool _suppressRefresh;
 
@@ -32,7 +33,6 @@ public partial class MainWindow : Window
     {
         App.Loader.Load(ConfigPath);
 
-        // Prompt for resources path if not yet configured
         if (string.IsNullOrEmpty(App.Loader.Config.ResourcesPath) ||
             App.Loader.VerifyResources().Count > 0)
         {
@@ -44,10 +44,12 @@ public partial class MainWindow : Window
         _gods   = App.Loader.LoadGodList();
         _layout = App.Loader.LoadLayout();
 
+        TxtResourcesPath.Text       = App.Loader.Config.ResourcesPath;
+        CmbResolution.SelectedIndex = App.Loader.Config.ResolutionIndex;
+
         PopulateTeamCombos();
         BuildRowViewModels();
 
-        // Open the two stream-facing output windows
         _display = new DisplayWindow();
         _display.ApplyLayout(_layout, App.Loader.Config);
         _display.Show();
@@ -56,7 +58,6 @@ public partial class MainWindow : Window
         _overlay.ApplyLayout(_layout, App.Loader.Config);
         _overlay.Show();
 
-        // Offer to restore an autosaved draft
         var saved = App.State.TryLoadAutosave();
         if (saved is not null)
         {
@@ -75,7 +76,7 @@ public partial class MainWindow : Window
         _overlay?.Close();
     }
 
-    // ── Team population ───────────────────────────────────────────────────
+    // ── Team combos ───────────────────────────────────────────────────────
 
     private void PopulateTeamCombos()
     {
@@ -93,6 +94,7 @@ public partial class MainWindow : Window
             _teamOne = App.Loader.LoadTeam(folder);
             _state.TeamOneName       = _teamOne.TeamName;
             _state.TeamOneFolderName = folder;
+            RefreshPlayerRoster();
             RefreshDisplay();
         }
     }
@@ -104,6 +106,7 @@ public partial class MainWindow : Window
             _teamTwo = App.Loader.LoadTeam(folder);
             _state.TeamTwoName       = _teamTwo.TeamName;
             _state.TeamTwoFolderName = folder;
+            RefreshPlayerRoster();
             RefreshDisplay();
         }
     }
@@ -112,90 +115,255 @@ public partial class MainWindow : Window
 
     private void BuildRowViewModels()
     {
-        _t1Bans.Clear(); _t2Bans.Clear();
-        _t1Picks.Clear(); _t2Picks.Clear();
+        _pickPairs.Clear();
+        _banPairs.Clear();
 
         var roles = _layout.RoleLabels;
         for (int i = 0; i < 5; i++)
         {
-            _t1Bans.Add(new BanRowVm  { Label = $"B{i+1}", Gods = _gods, Slot = _state.TeamOneBans[i]  });
-            _t2Bans.Add(new BanRowVm  { Label = $"B{i+1}", Gods = _gods, Slot = _state.TeamTwoBans[i]  });
-            _t1Picks.Add(new PickRowVm { Role = roles[i],  Gods = _gods, Slot = _state.TeamOnePicks[i] });
-            _t2Picks.Add(new PickRowVm { Role = roles[i],  Gods = _gods, Slot = _state.TeamTwoPicks[i] });
+            var t1Pick = _state.TeamOnePicks[i];
+            var t2Pick = _state.TeamTwoPicks[i];
+            _pickPairs.Add(new PickPairVm
+            {
+                RowNum   = i + 1,
+                Gods     = _gods,
+                T1Slot   = t1Pick,
+                T2Slot   = t2Pick,
+                T1God    = string.IsNullOrEmpty(t1Pick.GodName) ? null : t1Pick.GodName,
+                T1Locked = t1Pick.IsLocked,
+                T2God    = string.IsNullOrEmpty(t2Pick.GodName) ? null : t2Pick.GodName,
+                T2Locked = t2Pick.IsLocked,
+            });
+
+            var t1Ban = _state.TeamOneBans[i];
+            var t2Ban = _state.TeamTwoBans[i];
+            _banPairs.Add(new BanPairVm
+            {
+                RowNum   = i + 1,
+                Gods     = _gods,
+                T1Slot   = t1Ban,
+                T2Slot   = t2Ban,
+                T1God    = string.IsNullOrEmpty(t1Ban.GodName) ? null : t1Ban.GodName,
+                T1Locked = t1Ban.IsLocked,
+                T2God    = string.IsNullOrEmpty(t2Ban.GodName) ? null : t2Ban.GodName,
+                T2Locked = t2Ban.IsLocked,
+            });
         }
 
-        TeamOneBanList.ItemsSource  = _t1Bans;
-        TeamTwoBanList.ItemsSource  = _t2Bans;
-        TeamOnePickList.ItemsSource = _t1Picks;
-        TeamTwoPickList.ItemsSource = _t2Picks;
+        PickPairList.ItemsSource = _pickPairs;
+        BanPairList.ItemsSource  = _banPairs;
+        BuildPlayerRows();
     }
 
-    // ── Event handlers — Bans ─────────────────────────────────────────────
+    private void BuildPlayerRows()
+    {
+        _playerRows.Clear();
+        var roles = _layout.RoleLabels;
+        for (int i = 0; i < 5; i++)
+        {
+            _playerRows.Add(new PlayerRowVm
+            {
+                RowNum   = i + 1,
+                Role     = roles[i],
+                T1Player = _teamOne?.Roster.ElementAtOrDefault(i) ?? string.Empty,
+                T2Player = _teamTwo?.Roster.ElementAtOrDefault(i) ?? string.Empty,
+            });
+        }
+        PlayerRowList.ItemsSource = _playerRows;
+    }
 
-    private void BanGod_Changed(object sender, SelectionChangedEventArgs e)
+    private void RefreshPlayerRoster()
+    {
+        if (_playerRows.Count == 0) { BuildPlayerRows(); return; }
+        for (int i = 0; i < _playerRows.Count; i++)
+        {
+            _playerRows[i].T1Player = _teamOne?.Roster.ElementAtOrDefault(i) ?? string.Empty;
+            _playerRows[i].T2Player = _teamTwo?.Roster.ElementAtOrDefault(i) ?? string.Empty;
+        }
+        PlayerRowList.ItemsSource = null;
+        PlayerRowList.ItemsSource = _playerRows;
+    }
+
+    // ── Picks ─────────────────────────────────────────────────────────────
+
+    private void PickT1God_Changed(object sender, SelectionChangedEventArgs e)
     {
         if (_suppressRefresh) return;
-        if (sender is ComboBox cmb && cmb.Tag is BanRowVm vm)
+        if (sender is ComboBox cmb && cmb.Tag is PickPairVm vm)
         {
-            vm.Slot.GodName = vm.GodName ?? string.Empty;
+            vm.T1Slot.GodName = vm.T1God ?? string.Empty;
             App.Audio.PlayHover(App.Loader.GetHoverSoundPath());
         }
         RefreshDisplay();
     }
 
-    private void BanHover_Changed(object sender, RoutedEventArgs e)
-    {
-        if (sender is CheckBox chk && chk.Tag is BanRowVm vm)
-            vm.Slot.IsHovered = chk.IsChecked == true;
-        RefreshDisplay();
-    }
-
-    private void BanLock_Changed(object sender, RoutedEventArgs e)
-    {
-        if (sender is CheckBox chk && chk.Tag is BanRowVm vm)
-        {
-            vm.Slot.IsLocked = chk.IsChecked == true;
-            if (vm.Slot.IsLocked)
-            {
-                App.Audio.PlayLockIn(
-                    App.Loader.GetLockInSoundPath(),
-                    App.Loader.GetGodSoundPath(vm.Slot.GodName));
-            }
-        }
-        Autosave();
-        RefreshDisplay();
-    }
-
-    // ── Event handlers — Picks ────────────────────────────────────────────
-
-    private void PickGod_Changed(object sender, SelectionChangedEventArgs e)
+    private void PickT2God_Changed(object sender, SelectionChangedEventArgs e)
     {
         if (_suppressRefresh) return;
-        if (sender is ComboBox cmb && cmb.Tag is PickRowVm vm)
+        if (sender is ComboBox cmb && cmb.Tag is PickPairVm vm)
         {
-            vm.Slot.GodName = vm.GodName ?? string.Empty;
+            vm.T2Slot.GodName = vm.T2God ?? string.Empty;
             App.Audio.PlayHover(App.Loader.GetHoverSoundPath());
         }
         RefreshDisplay();
     }
 
-    private void PickLock_Changed(object sender, RoutedEventArgs e)
+    private void PickT1Lock_Changed(object sender, RoutedEventArgs e)
     {
-        if (sender is CheckBox chk && chk.Tag is PickRowVm vm)
+        if (sender is CheckBox chk && chk.Tag is PickPairVm vm)
         {
-            vm.Slot.IsLocked = chk.IsChecked == true;
-            if (vm.Slot.IsLocked)
-            {
-                App.Audio.PlayLockIn(
-                    App.Loader.GetLockInSoundPath(),
-                    App.Loader.GetGodSoundPath(vm.Slot.GodName));
-            }
+            vm.T1Slot.IsLocked = chk.IsChecked == true;
+            if (vm.T1Slot.IsLocked)
+                App.Audio.PlayLockIn(App.Loader.GetLockInSoundPath(), App.Loader.GetGodSoundPath(vm.T1Slot.GodName));
         }
         Autosave();
         RefreshDisplay();
     }
 
-    // ── Toolbar actions ───────────────────────────────────────────────────
+    private void PickT2Lock_Changed(object sender, RoutedEventArgs e)
+    {
+        if (sender is CheckBox chk && chk.Tag is PickPairVm vm)
+        {
+            vm.T2Slot.IsLocked = chk.IsChecked == true;
+            if (vm.T2Slot.IsLocked)
+                App.Audio.PlayLockIn(App.Loader.GetLockInSoundPath(), App.Loader.GetGodSoundPath(vm.T2Slot.GodName));
+        }
+        Autosave();
+        RefreshDisplay();
+    }
+
+    // ── Bans ──────────────────────────────────────────────────────────────
+
+    private void BanT1God_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (_suppressRefresh) return;
+        if (sender is ComboBox cmb && cmb.Tag is BanPairVm vm)
+        {
+            vm.T1Slot.GodName   = vm.T1God ?? string.Empty;
+            vm.T1Slot.IsHovered = !string.IsNullOrEmpty(vm.T1Slot.GodName);
+            App.Audio.PlayHover(App.Loader.GetHoverSoundPath());
+        }
+        RefreshDisplay();
+    }
+
+    private void BanT2God_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (_suppressRefresh) return;
+        if (sender is ComboBox cmb && cmb.Tag is BanPairVm vm)
+        {
+            vm.T2Slot.GodName   = vm.T2God ?? string.Empty;
+            vm.T2Slot.IsHovered = !string.IsNullOrEmpty(vm.T2Slot.GodName);
+            App.Audio.PlayHover(App.Loader.GetHoverSoundPath());
+        }
+        RefreshDisplay();
+    }
+
+    private void BanT1Lock_Changed(object sender, RoutedEventArgs e)
+    {
+        if (sender is CheckBox chk && chk.Tag is BanPairVm vm)
+        {
+            vm.T1Slot.IsLocked = chk.IsChecked == true;
+            if (vm.T1Slot.IsLocked)
+                App.Audio.PlayLockIn(App.Loader.GetLockInSoundPath(), App.Loader.GetGodSoundPath(vm.T1Slot.GodName));
+        }
+        Autosave();
+        RefreshDisplay();
+    }
+
+    private void BanT2Lock_Changed(object sender, RoutedEventArgs e)
+    {
+        if (sender is CheckBox chk && chk.Tag is BanPairVm vm)
+        {
+            vm.T2Slot.IsLocked = chk.IsChecked == true;
+            if (vm.T2Slot.IsLocked)
+                App.Audio.PlayLockIn(App.Loader.GetLockInSoundPath(), App.Loader.GetGodSoundPath(vm.T2Slot.GodName));
+        }
+        Autosave();
+        RefreshDisplay();
+    }
+
+    // ── Players ───────────────────────────────────────────────────────────
+
+    private void PlayerT1_LostFocus(object sender, RoutedEventArgs e)
+    {
+        if (sender is TextBox txt && txt.Tag is PlayerRowVm vm && _teamOne is not null)
+        {
+            var idx = vm.RowNum - 1;
+            if (idx >= 0 && idx < _teamOne.Roster.Length)
+                _teamOne.Roster[idx] = vm.T1Player ?? string.Empty;
+            App.Loader.SaveRoster(_teamOne);
+        }
+    }
+
+    private void PlayerT2_LostFocus(object sender, RoutedEventArgs e)
+    {
+        if (sender is TextBox txt && txt.Tag is PlayerRowVm vm && _teamTwo is not null)
+        {
+            var idx = vm.RowNum - 1;
+            if (idx >= 0 && idx < _teamTwo.Roster.Length)
+                _teamTwo.Roster[idx] = vm.T2Player ?? string.Empty;
+            App.Loader.SaveRoster(_teamTwo);
+        }
+    }
+
+    // ── Score / god names ─────────────────────────────────────────────────
+
+    private void Score_Changed(object sender, TextChangedEventArgs e)
+    {
+        if (TxtLeftScore is null || TxtRightScore is null) return;
+        if (int.TryParse(TxtLeftScore.Text, out var l)) _state.TeamOneScore = l;
+        if (int.TryParse(TxtRightScore.Text, out var r)) _state.TeamTwoScore = r;
+        RefreshDisplay();
+    }
+
+    private void ChkShowGodNames_Changed(object sender, RoutedEventArgs e)
+    {
+        if (ChkShowGodNamesVarious is not null)
+            ChkShowGodNamesVarious.IsChecked = ChkShowGodNames.IsChecked;
+        RefreshDisplay();
+    }
+
+    private void ChkShowGodNamesVarious_Changed(object sender, RoutedEventArgs e)
+    {
+        if (ChkShowGodNames is not null)
+            ChkShowGodNames.IsChecked = ChkShowGodNamesVarious.IsChecked;
+        RefreshDisplay();
+    }
+
+    // ── Inline config ─────────────────────────────────────────────────────
+
+    private void BtnBrowseResources_Click(object sender, RoutedEventArgs e)
+    {
+        var dlg = new OpenFolderDialog
+        {
+            Title            = "Select the Resources folder",
+            InitialDirectory = TxtResourcesPath.Text
+        };
+        if (dlg.ShowDialog() != true) return;
+
+        App.Loader.Config.ResourcesPath = dlg.FolderName;
+        TxtResourcesPath.Text           = dlg.FolderName;
+        App.Loader.SaveConfig(ConfigPath);
+
+        _gods   = App.Loader.LoadGodList();
+        _layout = App.Loader.LoadLayout();
+        BuildRowViewModels();
+        _display?.ApplyLayout(_layout, App.Loader.Config);
+        _overlay?.ApplyLayout(_layout, App.Loader.Config);
+        RefreshDisplay();
+    }
+
+    private void CmbResolution_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        // Guard: fires during initial construction before _display is set
+        if (_display is null) return;
+        App.Loader.Config.ResolutionIndex = CmbResolution.SelectedIndex;
+        App.Loader.SaveConfig(ConfigPath);
+        _display.ApplyLayout(_layout, App.Loader.Config);
+        _overlay?.ApplyLayout(_layout, App.Loader.Config);
+    }
+
+    // ── Draft actions ─────────────────────────────────────────────────────
 
     private void BtnNewDraft_Click(object sender, RoutedEventArgs e)
     {
@@ -203,7 +371,6 @@ public partial class MainWindow : Window
             MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
 
         _state.Clear();
-        // Re-apply team names and folder names since Clear() wipes them
         if (_teamOne is not null)
         {
             _state.TeamOneName       = _teamOne.TeamName;
@@ -222,6 +389,30 @@ public partial class MainWindow : Window
         RefreshDisplay();
     }
 
+    private void BtnResetPicks_Click(object sender, RoutedEventArgs e)
+    {
+        foreach (var s in _state.TeamOnePicks) s.Clear();
+        foreach (var s in _state.TeamTwoPicks) s.Clear();
+        _suppressRefresh = true;
+        foreach (var vm in _pickPairs) { vm.T1God = null; vm.T1Locked = false; vm.T2God = null; vm.T2Locked = false; }
+        _suppressRefresh = false;
+        PickPairList.ItemsSource = null;
+        PickPairList.ItemsSource = _pickPairs;
+        RefreshDisplay();
+    }
+
+    private void BtnResetBans_Click(object sender, RoutedEventArgs e)
+    {
+        foreach (var s in _state.TeamOneBans) s.Clear();
+        foreach (var s in _state.TeamTwoBans) s.Clear();
+        _suppressRefresh = true;
+        foreach (var vm in _banPairs) { vm.T1God = null; vm.T1Locked = false; vm.T2God = null; vm.T2Locked = false; }
+        _suppressRefresh = false;
+        BanPairList.ItemsSource = null;
+        BanPairList.ItemsSource = _banPairs;
+        RefreshDisplay();
+    }
+
     private void BtnSubmitBans_Click(object sender, RoutedEventArgs e)
     {
         var lockedOneBans = _state.TeamOneBans.Count(b => b.IsLocked);
@@ -237,19 +428,10 @@ public partial class MainWindow : Window
                   $"{_state.TeamOneName}: {lockedOneBans} ban(s)\n" +
                   $"{_state.TeamTwoName}: {lockedTwoBans} ban(s)";
 
-        if (MessageBox.Show(msg, "Submit Bans", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
-            return;
+        if (MessageBox.Show(msg, "Submit Bans", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
 
-        if (_teamOne is not null)
-        {
-            _teamOne.RecordGame(_state.TeamOneBans);
-            App.Loader.SaveTeam(_teamOne);
-        }
-        if (_teamTwo is not null)
-        {
-            _teamTwo.RecordGame(_state.TeamTwoBans);
-            App.Loader.SaveTeam(_teamTwo);
-        }
+        if (_teamOne is not null) { _teamOne.RecordGame(_state.TeamOneBans); App.Loader.SaveTeam(_teamOne); }
+        if (_teamTwo is not null) { _teamTwo.RecordGame(_state.TeamTwoBans); App.Loader.SaveTeam(_teamTwo); }
 
         App.State.DeleteAutosave();
         MessageBox.Show("Ban data saved.", "Submit Bans", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -257,60 +439,24 @@ public partial class MainWindow : Window
 
     private void BtnSwapTeams_Click(object sender, RoutedEventArgs e)
     {
-        var idxOne = CmbTeamOne.SelectedIndex;
-        var idxTwo = CmbTeamTwo.SelectedIndex;
-        CmbTeamOne.SelectedIndex = idxTwo;
-        CmbTeamTwo.SelectedIndex = idxOne;
+        (CmbTeamOne.SelectedIndex, CmbTeamTwo.SelectedIndex) = (CmbTeamTwo.SelectedIndex, CmbTeamOne.SelectedIndex);
     }
 
-    private void BtnResetTeamOneBans_Click(object sender, RoutedEventArgs e)
+    // ── Window management ─────────────────────────────────────────────────
+
+    private void BtnShowDisplay_Click(object sender, RoutedEventArgs e)
     {
-        foreach (var b in _state.TeamOneBans) b.Clear();
-        _suppressRefresh = true;
-        foreach (var vm in _t1Bans) { vm.GodName = null; vm.IsHovered = false; vm.IsLocked = false; }
-        _suppressRefresh = false;
-        RefreshDisplay();
+        if (_display is null) return;
+        if (_display.WindowState == WindowState.Minimized) _display.WindowState = WindowState.Normal;
+        _display.Activate();
     }
 
-    private void BtnResetTeamTwoBans_Click(object sender, RoutedEventArgs e)
+    private void BtnShowOverlay_Click(object sender, RoutedEventArgs e)
     {
-        foreach (var b in _state.TeamTwoBans) b.Clear();
-        _suppressRefresh = true;
-        foreach (var vm in _t2Bans) { vm.GodName = null; vm.IsHovered = false; vm.IsLocked = false; }
-        _suppressRefresh = false;
-        RefreshDisplay();
+        if (_overlay is null) return;
+        if (_overlay.WindowState == WindowState.Minimized) _overlay.WindowState = WindowState.Normal;
+        _overlay.Activate();
     }
-
-    private void BtnResetTeamOnePicks_Click(object sender, RoutedEventArgs e)
-    {
-        foreach (var p in _state.TeamOnePicks) p.Clear();
-        _suppressRefresh = true;
-        foreach (var vm in _t1Picks) { vm.GodName = null; vm.IsLocked = false; }
-        _suppressRefresh = false;
-        RefreshDisplay();
-    }
-
-    private void BtnResetTeamTwoPicks_Click(object sender, RoutedEventArgs e)
-    {
-        foreach (var p in _state.TeamTwoPicks) p.Clear();
-        _suppressRefresh = true;
-        foreach (var vm in _t2Picks) { vm.GodName = null; vm.IsLocked = false; }
-        _suppressRefresh = false;
-        RefreshDisplay();
-    }
-
-    private void Score_Changed(object sender, TextChangedEventArgs e)
-    {
-        if (TxtLeftScore is null || TxtRightScore is null)
-            return;
-
-        if (int.TryParse(TxtLeftScore.Text, out var l)) _state.TeamOneScore = l;
-        if (int.TryParse(TxtRightScore.Text, out var r)) _state.TeamTwoScore = r;
-        RefreshDisplay();
-    }
-
-    private void ChkShowGodNames_Changed(object sender, RoutedEventArgs e)
-        => RefreshDisplay();
 
     private void BtnGodManager_Click(object sender, RoutedEventArgs e)
     {
@@ -327,39 +473,15 @@ public partial class MainWindow : Window
     {
         var win = new SettingsWindow();
         win.ShowDialog();
-        // Reload everything in case the resources path or layout changed
         App.Loader.Load(ConfigPath);
         _gods   = App.Loader.LoadGodList();
         _layout = App.Loader.LoadLayout();
+        TxtResourcesPath.Text       = App.Loader.Config.ResourcesPath;
+        CmbResolution.SelectedIndex = App.Loader.Config.ResolutionIndex;
         _display?.ApplyLayout(_layout, App.Loader.Config);
         _overlay?.ApplyLayout(_layout, App.Loader.Config);
         BuildRowViewModels();
         RefreshDisplay();
-    }
-
-    private void BtnShowDisplay_Click(object sender, RoutedEventArgs e)
-    {
-        if (_display is null) return;
-        if (_display.WindowState == WindowState.Minimized)
-            _display.WindowState = WindowState.Normal;
-        _display.Activate();
-    }
-
-    private void BtnShowOverlay_Click(object sender, RoutedEventArgs e)
-    {
-        if (_overlay is null) return;
-        if (_overlay.WindowState == WindowState.Minimized)
-            _overlay.WindowState = WindowState.Normal;
-        _overlay.Activate();
-    }
-
-    private void BtnAbout_Click(object sender, RoutedEventArgs e)
-    {
-        MessageBox.Show(
-            "SmitePnB\nSmite 2 Pick & Ban broadcasting tool\n\n" +
-            "Remade by diese\nBuilt on the foundation of the Smite esports community\n\n" +
-            "github.com/diese-tech/legacy-app-audit",
-            "About SmitePnB", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────
@@ -387,44 +509,41 @@ public partial class MainWindow : Window
 
         _suppressRefresh = true;
         BuildRowViewModels();
-        for (int i = 0; i < 5; i++)
-        {
-            _t1Bans[i].GodName   = saved.TeamOneBans[i].GodName;
-            _t1Bans[i].IsHovered = saved.TeamOneBans[i].IsHovered;
-            _t1Bans[i].IsLocked  = saved.TeamOneBans[i].IsLocked;
-
-            _t2Bans[i].GodName   = saved.TeamTwoBans[i].GodName;
-            _t2Bans[i].IsHovered = saved.TeamTwoBans[i].IsHovered;
-            _t2Bans[i].IsLocked  = saved.TeamTwoBans[i].IsLocked;
-
-            _t1Picks[i].GodName  = saved.TeamOnePicks[i].GodName;
-            _t1Picks[i].IsLocked = saved.TeamOnePicks[i].IsLocked;
-
-            _t2Picks[i].GodName  = saved.TeamTwoPicks[i].GodName;
-            _t2Picks[i].IsLocked = saved.TeamTwoPicks[i].IsLocked;
-        }
         _suppressRefresh = false;
         RefreshDisplay();
     }
 }
 
-// ── Row view models ───────────────────────────────────────────────────────
+// ── View models ───────────────────────────────────────────────────────────
 
-public class BanRowVm
+public class PickPairVm
 {
-    public string?       Label     { get; set; }
-    public List<string>  Gods      { get; set; } = [];
-    public string?       GodName   { get; set; }
-    public bool          IsHovered { get; set; }
-    public bool          IsLocked  { get; set; }
-    public BanSlot       Slot      { get; set; } = new();
+    public int          RowNum   { get; set; }
+    public List<string> Gods     { get; set; } = [];
+    public string?      T1God    { get; set; }
+    public bool         T1Locked { get; set; }
+    public string?      T2God    { get; set; }
+    public bool         T2Locked { get; set; }
+    public PickSlot     T1Slot   { get; set; } = new();
+    public PickSlot     T2Slot   { get; set; } = new();
 }
 
-public class PickRowVm
+public class BanPairVm
 {
-    public string?       Role     { get; set; }
-    public List<string>  Gods     { get; set; } = [];
-    public string?       GodName  { get; set; }
-    public bool          IsLocked { get; set; }
-    public PickSlot      Slot     { get; set; } = new();
+    public int          RowNum   { get; set; }
+    public List<string> Gods     { get; set; } = [];
+    public string?      T1God    { get; set; }
+    public bool         T1Locked { get; set; }
+    public string?      T2God    { get; set; }
+    public bool         T2Locked { get; set; }
+    public BanSlot      T1Slot   { get; set; } = new();
+    public BanSlot      T2Slot   { get; set; } = new();
+}
+
+public class PlayerRowVm
+{
+    public int     RowNum   { get; set; }
+    public string? Role     { get; set; }
+    public string? T1Player { get; set; }
+    public string? T2Player { get; set; }
 }

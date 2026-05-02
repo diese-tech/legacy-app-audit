@@ -9,6 +9,8 @@ namespace SmitePnB.Windows;
 
 public partial class SettingsWindow : Window
 {
+    public SettingsWindow() { InitializeComponent(); }
+
     private static readonly string ConfigPath =
         Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
     private static readonly string DefaultResourcesPath =
