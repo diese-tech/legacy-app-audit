@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
-using System.Windows.Forms;
 using System.Windows.Media;
+using Microsoft.Win32;
 using SmitePnB.Models;
 
 namespace SmitePnB.Windows;
@@ -44,14 +44,13 @@ public partial class SettingsWindow : Window
 
     private void BtnBrowse_Click(object sender, RoutedEventArgs e)
     {
-        using var dlg = new FolderBrowserDialog
+        var dlg = new OpenFolderDialog
         {
-            Description         = "Select the Resources folder",
-            UseDescriptionForTitle = true,
-            SelectedPath        = TxtResourcesPath.Text
+            Title            = "Select the Resources folder",
+            InitialDirectory = TxtResourcesPath.Text
         };
-        if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            TxtResourcesPath.Text = dlg.SelectedPath;
+        if (dlg.ShowDialog() == true)
+            TxtResourcesPath.Text = dlg.FolderName;
     }
 
     // ── Font ──────────────────────────────────────────────────────────────
